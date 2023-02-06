@@ -22,9 +22,11 @@ Daily new positive and negative tests (from 07/04/2020 to 28/04/2021), from *Our
 
 ### data_daily_deaths_UK_2021_May_05.csv
 
-Daily new fatality cases (from 02/02/2020 to 23/04/2021), from *GOV.UK*, - *Daily deaths with COVID-19 on the death certificate by date of death*:
+Daily new fatality cases (from 02/02/2020 to 23/04/2021), from *GOV.UK*:
 
 [https://coronavirus.data.gov.uk/details/deaths](https://coronavirus.data.gov.uk/details/deaths)
+
+(see 'Daily deaths with COVID-19 on the death certificate by date of death')
 
 ### Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods
 
