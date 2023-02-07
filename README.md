@@ -17,23 +17,18 @@ This is publicly available data that were downloaded from the Internet. All data
 ### daily-tests-and-daily-new-confirmed-covid-cases.csv
 
 &#11169;&emsp; Daily number of tests with new cases tested positive (from 07/04/2020 to 28/04/2021), downloaded from *Our World in Data*:
-
 https://ourworldindata.org/grapher/daily-tests-and-daily-new-confirmed-covid-cases?country=~GBR
 
 ### data_daily_deaths_UK_2021_May_05.csv
 
 &#11169;&emsp; Daily new fatality cases (from 02/02/2020 to 23/04/2021), downloaded from *GOV.UK* (visited 05/05/2021):
-
-https://coronavirus.data.gov.uk/details/deaths
-
-(see 'Daily deaths with COVID-19 on the death certificate by date of death')
+https://coronavirus.data.gov.uk/details/deaths (see 'Daily deaths with COVID-19 on the death certificate by date of death').
 
 ### Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods
 
 [DOWNLOAD](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/957631/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods) (ods file)
 
 &#11169;&emsp; Fequencies of SGTF (S-Gene Target Failures) in the 9 regions of England, from *Public Health England Technical Briefing 5*:
-
 https://www.gov.uk/government/publications/investigation-of-novel-sars-cov-2-variant-variant-of-concern-20201201
 
 ## R codes
