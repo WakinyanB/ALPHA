@@ -16,13 +16,13 @@ Stringency Index (from 21/01/2020 to 23/03/2021), computed by the Oxford COVID-1
 
 ### daily-tests-and-daily-new-confirmed-covid-cases.csv
 
-Daily new positive and negative tests (from 07/04/2020 to 28/04/2021), from *Our World in Data*:
+Daily number of tests with new cases tested positive (from 07/04/2020 to 28/04/2021), downloaded from *Our World in Data*:
 
 https://ourworldindata.org/grapher/daily-tests-and-daily-new-confirmed-covid-cases?country=~GBR
 
 ### data_daily_deaths_UK_2021_May_05.csv
 
-Daily new fatality cases (from 02/02/2020 to 23/04/2021), from *GOV.UK*:
+Daily new fatality cases (from 02/02/2020 to 23/04/2021), downloaded from *GOV.UK*:
 
 https://coronavirus.data.gov.uk/details/deaths
 
@@ -30,7 +30,7 @@ https://coronavirus.data.gov.uk/details/deaths
 
 ### Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods
 
-Download: https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/957631/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods
+[DOWNLOAD](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/957631/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods) (ods file)
 
 Fequencies of SGTF (S-Gene Target Failures) in the 9 regions of England, from *Public Health England Technical Briefing 5*:
 
