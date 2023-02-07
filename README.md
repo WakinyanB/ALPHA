@@ -52,9 +52,9 @@ Scripts:
 
 In addition:
 
-- **Selection_coefficient_vs_Stringency_Index.R** explores the correlation between the selection coefficient of the Alpha variant and the Stringency Index in the UK; the script generates Fig. S2;
-- **Fig_2step_analysis_with_real_data.R** generates Fig. 1;
-- **Fig_Spread_variant_B117_UK.R** generates Fig. S1.
+- **Selection_coefficient_vs_Stringency_Index.R** explores the correlation between the selection coefficient of the Alpha variant and the Stringency Index in the UK; the script generates Fig. S2
+- **Fig_2step_analysis_with_real_data.R** generates Fig. 1
+- **Fig_Spread_variant_B117_UK.R** generates Fig. S1
 
 ---
 
