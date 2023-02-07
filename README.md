@@ -22,7 +22,7 @@ https://ourworldindata.org/grapher/daily-tests-and-daily-new-confirmed-covid-cas
 
 ### data_daily_deaths_UK_2021_May_05.csv
 
-Daily new fatality cases (from 02/02/2020 to 23/04/2021), downloaded from *GOV.UK*:
+Daily new fatality cases (from 02/02/2020 to 23/04/2021), downloaded from *GOV.UK* (visited 05/05/2021):
 
 https://coronavirus.data.gov.uk/details/deaths
 
