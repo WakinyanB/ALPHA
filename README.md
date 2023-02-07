@@ -40,7 +40,7 @@ We developed a two-step approach based on a SEIR model and the analysis of a com
 Scripts:
 - **STEP1_functions.R** (script with functions used in the first step)
 - **STEP1_Script_UK_data.Rmd** (analyses using the UK data)
-- **STEP1_Identifiability_profiles.Rmd** (build and plot identifiability profile of our model)
+- **STEP1_Identifiability_profiles.Rmd** (build and plot identifiability profiles of the model)
 
 (2) In the second step, based on a novel theoretical derivation of the selection gradient in a SEIR model, we infer the phenotype of the Alpha variant from the analysis of the change in its logit-frequency.
 
