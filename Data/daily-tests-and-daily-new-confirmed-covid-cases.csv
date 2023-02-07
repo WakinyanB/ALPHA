@@ -1,0 +1,459 @@
+Entity,Code,Day,new_tests_7day_smoothed,142752-annotations,"Daily new confirmed cases due to COVID-19 (rolling 7-day average, right-aligned)"
+United Kingdom,GBR,2020-04-07,17876,tests performed,4772.71429
+United Kingdom,GBR,2020-04-08,18521,tests performed,4799.71429
+United Kingdom,GBR,2020-04-09,19013,tests performed,4796.42857
+United Kingdom,GBR,2020-04-10,15713,tests performed,4708.71429
+United Kingdom,GBR,2020-04-11,15963,tests performed,4643
+United Kingdom,GBR,2020-04-12,16216,tests performed,4627.14286
+United Kingdom,GBR,2020-04-13,16252,tests performed,4468.42857
+United Kingdom,GBR,2020-04-14,16515,tests performed,4305.85714
+United Kingdom,GBR,2020-04-15,16817,tests performed,4296.85714
+United Kingdom,GBR,2020-04-16,17178,tests performed,4359.28571
+United Kingdom,GBR,2020-04-17,17657,tests performed,4448.28571
+United Kingdom,GBR,2020-04-18,18172,tests performed,4608.71429
+United Kingdom,GBR,2020-04-19,18859,tests performed,4654.57143
+United Kingdom,GBR,2020-04-20,21797,tests performed,4749
+United Kingdom,GBR,2020-04-21,22726,tests performed,4810
+United Kingdom,GBR,2020-04-22,23371,tests performed,4867.85714
+United Kingdom,GBR,2020-04-23,24386,tests performed,4842.85714
+United Kingdom,GBR,2020-04-24,25399,tests performed,4841.57143
+United Kingdom,GBR,2020-04-25,26514,tests performed,4702.71429
+United Kingdom,GBR,2020-04-26,28271,tests performed,4647.42857
+United Kingdom,GBR,2020-04-27,27761,tests performed,4624.28571
+United Kingdom,GBR,2020-04-28,30975,tests performed,4617.42857
+United Kingdom,GBR,2020-04-29,37362,tests performed,4609.57143
+United Kingdom,GBR,2020-04-30,45227,tests performed,4580.42857
+United Kingdom,GBR,2020-05-01,51787,tests performed,4544.57143
+United Kingdom,GBR,2020-05-02,56716,tests performed,4468.28571
+United Kingdom,GBR,2020-05-03,61943,tests performed,4397.42857
+United Kingdom,GBR,2020-05-04,68805,tests performed,4208.71429
+United Kingdom,GBR,2020-05-05,71218,tests performed,4060.42857
+United Kingdom,GBR,2020-05-06,72513,tests performed,3829.85714
+United Kingdom,GBR,2020-05-07,71710,tests performed,3659.42857
+United Kingdom,GBR,2020-05-08,72114,tests performed,3419.71429
+United Kingdom,GBR,2020-05-09,74055,tests performed,3265.42857
+United Kingdom,GBR,2020-05-10,75242,tests performed,3171.85714
+United Kingdom,GBR,2020-05-11,73929,tests performed,3201.28571
+United Kingdom,GBR,2020-05-12,75706,tests performed,3159.28571
+United Kingdom,GBR,2020-05-13,76711,tests performed,3082.71429
+United Kingdom,GBR,2020-05-14,77745,tests performed,2918
+United Kingdom,GBR,2020-05-15,79799,tests performed,2842.14286
+United Kingdom,GBR,2020-05-16,81828,tests performed,2831
+United Kingdom,GBR,2020-05-17,82510,tests performed,2760.14286
+United Kingdom,GBR,2020-05-18,82469,tests performed,2615.57143
+United Kingdom,GBR,2020-05-19,82921,tests performed,2567.42857
+United Kingdom,GBR,2020-05-20,83315,tests performed,2483.42857
+United Kingdom,GBR,2020-05-21,86309,tests performed,2474.28571
+United Kingdom,GBR,2020-05-22,86288,tests performed,2405.71429
+United Kingdom,GBR,2020-05-23,86357,tests performed,2325.14286
+United Kingdom,GBR,2020-05-24,83241,tests performed,2257.85714
+United Kingdom,GBR,2020-05-25,94415,tests performed,2120.14286
+United Kingdom,GBR,2020-05-26,94438,tests performed,1920.28571
+United Kingdom,GBR,2020-05-27,93872,tests performed,1791.28571
+United Kingdom,GBR,2020-05-28,93313,tests performed,1674.42857
+United Kingdom,GBR,2020-05-29,95351,tests performed,1598.28571
+United Kingdom,GBR,2020-05-30,96088,tests performed,1541
+United Kingdom,GBR,2020-05-31,99342,tests performed,1500.28571
+United Kingdom,GBR,2020-06-01,88236,tests performed,1476.14286
+United Kingdom,GBR,2020-06-02,90347,tests performed,1449.14286
+United Kingdom,GBR,2020-06-03,93110,tests performed,1383.42857
+United Kingdom,GBR,2020-06-04,92786,tests performed,1312.28571
+United Kingdom,GBR,2020-06-05,92425,tests performed,1255.42857
+United Kingdom,GBR,2020-06-06,91940,tests performed,1210.71429
+United Kingdom,GBR,2020-06-07,92625,tests performed,1160.42857
+United Kingdom,GBR,2020-06-08,97603,tests performed,1110.42857
+United Kingdom,GBR,2020-06-09,97847,tests performed,1066
+United Kingdom,GBR,2020-06-10,97718,tests performed,1042.71429
+United Kingdom,GBR,2020-06-11,98226,tests performed,1009.71429
+United Kingdom,GBR,2020-06-12,97765,tests performed,1001.71429
+United Kingdom,GBR,2020-06-13,98654,tests performed,1015.14286
+United Kingdom,GBR,2020-06-14,96274,tests performed,1027.85714
+United Kingdom,GBR,2020-06-15,91410,tests performed,1018.85714
+United Kingdom,GBR,2020-06-16,89475,tests performed,1008
+United Kingdom,GBR,2020-06-17,87379,tests performed,981.28571
+United Kingdom,GBR,2020-06-18,86014,tests performed,983.14286
+United Kingdom,GBR,2020-06-19,84706,tests performed,973.14286
+United Kingdom,GBR,2020-06-20,82409,tests performed,941.42857
+United Kingdom,GBR,2020-06-21,81021,tests performed,915.28571
+United Kingdom,GBR,2020-06-22,80267,tests performed,895.42857
+United Kingdom,GBR,2020-06-23,79237,tests performed,866.71429
+United Kingdom,GBR,2020-06-24,79908,tests performed,835
+United Kingdom,GBR,2020-06-25,88224,tests performed,788.85714
+United Kingdom,GBR,2020-06-26,90427,tests performed,739.57143
+United Kingdom,GBR,2020-06-27,92839,tests performed,735
+United Kingdom,GBR,2020-06-28,96160,tests performed,704
+United Kingdom,GBR,2020-06-29,97874,tests performed,665.14286
+United Kingdom,GBR,2020-06-30,104648,tests performed,596.85714
+United Kingdom,GBR,2020-07-01,109277,tests performed,494.85714
+United Kingdom,GBR,2020-07-02,107056,tests performed,396.14286
+United Kingdom,GBR,2020-07-03,111842,tests performed,376.57143
+United Kingdom,GBR,2020-07-04,113810,tests performed,375.28571
+United Kingdom,GBR,2020-07-05,115178,tests performed,391.28571
+United Kingdom,GBR,2020-07-06,115099,tests performed,354
+United Kingdom,GBR,2020-07-07,113087,tests performed,379.71429
+United Kingdom,GBR,2020-07-08,113611,tests performed,461.71429
+United Kingdom,GBR,2020-07-09,113881,tests performed,552.71429
+United Kingdom,GBR,2020-07-10,113119,tests performed,555.85714
+United Kingdom,GBR,2020-07-11,114854,tests performed,584.57143
+United Kingdom,GBR,2020-07-12,115080,tests performed,603.28571
+United Kingdom,GBR,2020-07-13,116132,tests performed,628.71429
+United Kingdom,GBR,2020-07-14,117800,tests performed,722.42857
+United Kingdom,GBR,2020-07-15,119815,tests performed,708.28571
+United Kingdom,GBR,2020-07-16,121705,tests performed,708.85714
+United Kingdom,GBR,2020-07-17,126098,tests performed,732.14286
+United Kingdom,GBR,2020-07-18,127416,tests performed,732.57143
+United Kingdom,GBR,2020-07-19,130151,tests performed,743.42857
+United Kingdom,GBR,2020-07-20,131373,tests performed,750.42857
+United Kingdom,GBR,2020-07-21,133369,tests performed,636.85714
+United Kingdom,GBR,2020-07-22,132787,tests performed,640.42857
+United Kingdom,GBR,2020-07-23,131334,tests performed,659.28571
+United Kingdom,GBR,2020-07-24,128898,tests performed,671
+United Kingdom,GBR,2020-07-25,129367,tests performed,662.57143
+United Kingdom,GBR,2020-07-26,129892,tests performed,666
+United Kingdom,GBR,2020-07-27,129330,tests performed,680.57143
+United Kingdom,GBR,2020-07-28,131500,tests performed,696
+United Kingdom,GBR,2020-07-29,134413,tests performed,730.14286
+United Kingdom,GBR,2020-07-30,138597,tests performed,739.85714
+United Kingdom,GBR,2020-07-31,141013,tests performed,756.14286
+United Kingdom,GBR,2020-08-01,142006,tests performed,756
+United Kingdom,GBR,2020-08-02,146135,tests performed,755.57143
+United Kingdom,GBR,2020-08-03,154054,tests performed,791.85714
+United Kingdom,GBR,2020-08-04,154503,tests performed,809.28571
+United Kingdom,GBR,2020-08-05,155143,tests performed,824.14286
+United Kingdom,GBR,2020-08-06,155881,tests performed,840.85714
+United Kingdom,GBR,2020-08-07,157091,tests performed,843.28571
+United Kingdom,GBR,2020-08-08,159183,tests performed,842.71429
+United Kingdom,GBR,2020-08-09,161573,tests performed,895
+United Kingdom,GBR,2020-08-10,162730,tests performed,877.28571
+United Kingdom,GBR,2020-08-11,163691,tests performed,945.14286
+United Kingdom,GBR,2020-08-12,165976,tests performed,964.14286
+United Kingdom,GBR,2020-08-13,164418,tests performed,990.42857
+United Kingdom,GBR,2020-08-14,164022,tests performed,1070.57143
+United Kingdom,GBR,2020-08-15,166815,tests performed,1110.14286
+United Kingdom,GBR,2020-08-16,167752,tests performed,1109.85714
+United Kingdom,GBR,2020-08-17,166778,tests performed,1096
+United Kingdom,GBR,2020-08-18,166709,tests performed,1090.71429
+United Kingdom,GBR,2020-08-19,166964,tests performed,1061
+United Kingdom,GBR,2020-08-20,168450,tests performed,1067.71429
+United Kingdom,GBR,2020-08-21,170084,tests performed,1010.42857
+United Kingdom,GBR,2020-08-22,169667,tests performed,1051.85714
+United Kingdom,GBR,2020-08-23,169093,tests performed,1042.85714
+United Kingdom,GBR,2020-08-24,169331,tests performed,1079.42857
+United Kingdom,GBR,2020-08-25,175553,tests performed,1092
+United Kingdom,GBR,2020-08-26,179503,tests performed,1137
+United Kingdom,GBR,2020-08-27,183349,tests performed,1186.57143
+United Kingdom,GBR,2020-08-28,184457,tests performed,1220.42857
+United Kingdom,GBR,2020-08-29,184850,tests performed,1188.71429
+United Kingdom,GBR,2020-08-30,186989,tests performed,1289.28571
+United Kingdom,GBR,2020-08-31,191620,tests performed,1351.85714
+United Kingdom,GBR,2020-09-01,187399,tests performed,1370.57143
+United Kingdom,GBR,2020-09-02,187522,tests performed,1423.14286
+United Kingdom,GBR,2020-09-03,187181,tests performed,1457
+United Kingdom,GBR,2020-09-04,189075,tests performed,1554.28571
+United Kingdom,GBR,2020-09-05,190364,tests performed,1656.71429
+United Kingdom,GBR,2020-09-06,192055,tests performed,1833.14286
+United Kingdom,GBR,2020-09-07,195142,tests performed,2052.85714
+United Kingdom,GBR,2020-09-08,199807,tests performed,2217
+United Kingdom,GBR,2020-09-09,202321,tests performed,2383.71429
+United Kingdom,GBR,2020-09-10,208360,tests performed,2548.28571
+United Kingdom,GBR,2020-09-11,219557,tests performed,2772
+United Kingdom,GBR,2020-09-12,225228,tests performed,3011.57143
+United Kingdom,GBR,2020-09-13,229871,tests performed,3061.71429
+United Kingdom,GBR,2020-09-14,231949,tests performed,3014.85714
+United Kingdom,GBR,2020-09-15,236820,tests performed,3105.42857
+United Kingdom,GBR,2020-09-16,239593,tests performed,3294.85714
+United Kingdom,GBR,2020-09-17,239533,tests performed,3363.28571
+United Kingdom,GBR,2020-09-18,237524,tests performed,3475.42857
+United Kingdom,GBR,2020-09-19,240696,tests performed,3607.57143
+United Kingdom,GBR,2020-09-20,242039,tests performed,3687.71429
+United Kingdom,GBR,2020-09-21,240647,tests performed,3938.14286
+United Kingdom,GBR,2020-09-22,236805,tests performed,4198.28571
+United Kingdom,GBR,2020-09-23,238921,tests performed,4509.71429
+United Kingdom,GBR,2020-09-24,243699,tests performed,4971.71429
+United Kingdom,GBR,2020-09-25,246961,tests performed,5335.85714
+United Kingdom,GBR,2020-09-26,247609,tests performed,5567.42857
+United Kingdom,GBR,2020-09-27,251715,tests performed,5824.71429
+United Kingdom,GBR,2020-09-28,254677,tests performed,5778.71429
+United Kingdom,GBR,2020-09-29,259658,tests performed,6095.85714
+United Kingdom,GBR,2020-09-30,259436,tests performed,6228.71429
+United Kingdom,GBR,2020-10-01,258761,tests performed,6269.42857
+United Kingdom,GBR,2020-10-02,255897,tests performed,6286
+United Kingdom,GBR,2020-10-03,260370,tests performed,7262.42857
+United Kingdom,GBR,2020-10-04,258488,tests performed,9728.85714
+United Kingdom,GBR,2020-10-05,265037,tests performed,10949.85714
+United Kingdom,GBR,2020-10-06,267417,tests performed,12007.14286
+United Kingdom,GBR,2020-10-07,267049,tests performed,13015.14286
+United Kingdom,GBR,2020-10-08,271785,tests performed,14532.42857
+United Kingdom,GBR,2020-10-09,275580,tests performed,15517.28571
+United Kingdom,GBR,2020-10-10,274552,tests performed,15844.42857
+United Kingdom,GBR,2020-10-11,275781,tests performed,14404
+United Kingdom,GBR,2020-10-12,268319,tests performed,14605.14286
+United Kingdom,GBR,2020-10-13,273998,tests performed,14989.85714
+United Kingdom,GBR,2020-10-14,280489,tests performed,15786.71429
+United Kingdom,GBR,2020-10-15,280684,tests performed,15993.28571
+United Kingdom,GBR,2020-10-16,282912,tests performed,16246
+United Kingdom,GBR,2020-10-17,287027,tests performed,16390.42857
+United Kingdom,GBR,2020-10-18,293876,tests performed,16977.85714
+United Kingdom,GBR,2020-10-19,299798,tests performed,17666.28571
+United Kingdom,GBR,2020-10-20,296936,tests performed,18254.14286
+United Kingdom,GBR,2020-10-21,299735,tests performed,19247.85714
+United Kingdom,GBR,2020-10-22,305488,tests performed,19570.85714
+United Kingdom,GBR,2020-10-23,310444,tests performed,20271.14286
+United Kingdom,GBR,2020-10-24,311799,tests performed,21249.28571
+United Kingdom,GBR,2020-10-25,313830,tests performed,21649.71429
+United Kingdom,GBR,2020-10-26,314083,tests performed,21945.42857
+United Kingdom,GBR,2020-10-27,314888,tests performed,22168.14286
+United Kingdom,GBR,2020-10-28,313153,tests performed,21883.42857
+United Kingdom,GBR,2020-10-29,313862,tests performed,22143.57143
+United Kingdom,GBR,2020-10-30,308399,tests performed,22694.85714
+United Kingdom,GBR,2020-10-31,305130,tests performed,22535.71429
+United Kingdom,GBR,2020-11-01,298169,tests performed,23030.57143
+United Kingdom,GBR,2020-11-02,292061,tests performed,22754.42857
+United Kingdom,GBR,2020-11-03,289617,tests performed,22347.85714
+United Kingdom,GBR,2020-11-04,290252,tests performed,22418.14286
+United Kingdom,GBR,2020-11-05,289941,tests performed,22573.28571
+United Kingdom,GBR,2020-11-06,296587,tests performed,22416.71429
+United Kingdom,GBR,2020-11-07,301503,tests performed,22853.85714
+United Kingdom,GBR,2020-11-08,303509,tests performed,22470.85714
+United Kingdom,GBR,2020-11-09,306722,tests performed,22818
+United Kingdom,GBR,2020-11-10,311530,tests performed,22871.28571
+United Kingdom,GBR,2020-11-11,321199,tests performed,22556.14286
+United Kingdom,GBR,2020-11-12,325918,tests performed,23892.28571
+United Kingdom,GBR,2020-11-13,329789,tests performed,24462.85714
+United Kingdom,GBR,2020-11-14,331855,tests performed,24733.85714
+United Kingdom,GBR,2020-11-15,331285,tests performed,25362
+United Kingdom,GBR,2020-11-16,332527,tests performed,25364.71429
+United Kingdom,GBR,2020-11-17,329640,tests performed,25308.85714
+United Kingdom,GBR,2020-11-18,328749,tests performed,24829.57143
+United Kingdom,GBR,2020-11-19,331956,tests performed,23318
+United Kingdom,GBR,2020-11-20,333316,tests performed,22312
+United Kingdom,GBR,2020-11-21,336915,tests performed,21318.42857
+United Kingdom,GBR,2020-11-22,337048,tests performed,20417
+United Kingdom,GBR,2020-11-23,331571,tests performed,19566.85714
+United Kingdom,GBR,2020-11-24,336006,tests performed,18321.71429
+United Kingdom,GBR,2020-11-25,333150,tests performed,18124
+United Kingdom,GBR,2020-11-26,330435,tests performed,17355.57143
+United Kingdom,GBR,2020-11-27,322212,tests performed,16576.57143
+United Kingdom,GBR,2020-11-28,313960,tests performed,16000.85714
+United Kingdom,GBR,2020-11-29,305198,tests performed,15071.85714
+United Kingdom,GBR,2020-11-30,307886,tests performed,14638
+United Kingdom,GBR,2020-12-01,308289,tests performed,14945.57143
+United Kingdom,GBR,2020-12-02,308030,tests performed,14656.42857
+United Kingdom,GBR,2020-12-03,309091,tests performed,14284.14286
+United Kingdom,GBR,2020-12-04,315773,tests performed,14507.14286
+United Kingdom,GBR,2020-12-05,321991,tests performed,14462.57143
+United Kingdom,GBR,2020-12-06,329247,tests performed,15206.57143
+United Kingdom,GBR,2020-12-07,327126,tests performed,15541.71429
+United Kingdom,GBR,2020-12-08,323827,tests performed,15383
+United Kingdom,GBR,2020-12-09,328047,tests performed,15439.71429
+United Kingdom,GBR,2020-12-10,329338,tests performed,16313.28571
+United Kingdom,GBR,2020-12-11,330863,tests performed,17085
+United Kingdom,GBR,2020-12-12,331387,tests performed,17938.57143
+United Kingdom,GBR,2020-12-13,337024,tests performed,18105.57143
+United Kingdom,GBR,2020-12-14,345222,tests performed,18906
+United Kingdom,GBR,2020-12-15,347811,tests performed,19789.28571
+United Kingdom,GBR,2020-12-16,345222,tests performed,21027.28571
+United Kingdom,GBR,2020-12-17,344780,tests performed,23093.85714
+United Kingdom,GBR,2020-12-18,344711,tests performed,24061.85714
+United Kingdom,GBR,2020-12-19,356456,tests performed,24875.42857
+United Kingdom,GBR,2020-12-20,373781,tests performed,27381.57143
+United Kingdom,GBR,2020-12-21,396256,tests performed,29258.71429
+United Kingdom,GBR,2020-12-22,416747,tests performed,31881.85714
+United Kingdom,GBR,2020-12-23,437523,tests performed,33894.28571
+United Kingdom,GBR,2020-12-24,446946,tests performed,34411
+United Kingdom,GBR,2020-12-25,439531,tests performed,35017.14286
+United Kingdom,GBR,2020-12-26,415202,tests performed,36094.14286
+United Kingdom,GBR,2020-12-27,413474,tests performed,35581.14286
+United Kingdom,GBR,2020-12-28,402747,tests performed,36715.85714
+United Kingdom,GBR,2020-12-29,386976,tests performed,39050.71429
+United Kingdom,GBR,2020-12-30,374544,tests performed,40601
+United Kingdom,GBR,2020-12-31,380014,tests performed,43012.42857
+United Kingdom,GBR,2021-01-01,392088,tests performed,45963.14286
+United Kingdom,GBR,2021-01-02,412361,tests performed,49258.14286
+United Kingdom,GBR,2021-01-03,413532,tests performed,52495.85714
+United Kingdom,GBR,2021-01-04,430506,tests performed,54990.57143
+United Kingdom,GBR,2021-01-05,453243,tests performed,56106.57143
+United Kingdom,GBR,2021-01-06,474353,tests performed,57866.14286
+United Kingdom,GBR,2021-01-07,491966,tests performed,57403
+United Kingdom,GBR,2021-01-08,529368,tests performed,59507.85714
+United Kingdom,GBR,2021-01-09,551821,tests performed,59828.57143
+United Kingdom,GBR,2021-01-10,560191,tests performed,59809.85714
+United Kingdom,GBR,2021-01-11,570691,tests performed,58003
+United Kingdom,GBR,2021-01-12,583316,tests performed,55797.42857
+United Kingdom,GBR,2021-01-13,594228,tests performed,53669.71429
+United Kingdom,GBR,2021-01-14,605548,tests performed,53100.71429
+United Kingdom,GBR,2021-01-15,594155,tests performed,51342.57143
+United Kingdom,GBR,2021-01-16,584383,tests performed,48675.42857
+United Kingdom,GBR,2021-01-17,575303,tests performed,46338.85714
+United Kingdom,GBR,2021-01-18,580038,tests performed,45101
+United Kingdom,GBR,2021-01-19,580803,tests performed,43359
+United Kingdom,GBR,2021-01-20,583557,tests performed,42120.42857
+United Kingdom,GBR,2021-01-21,580052,tests performed,40573.71429
+United Kingdom,GBR,2021-01-22,586092,tests performed,38350.28571
+United Kingdom,GBR,2021-01-23,584714,tests performed,37239.42857
+United Kingdom,GBR,2021-01-24,583857,tests performed,36016.71429
+United Kingdom,GBR,2021-01-25,580737,tests performed,33821.57143
+United Kingdom,GBR,2021-01-26,583352,tests performed,31923.42857
+United Kingdom,GBR,2021-01-27,600817,tests performed,29977.28571
+United Kingdom,GBR,2021-01-28,614839,tests performed,28667.85714
+United Kingdom,GBR,2021-01-29,619623,tests performed,27071.28571
+United Kingdom,GBR,2021-01-30,613383,tests performed,25606.71429
+United Kingdom,GBR,2021-01-31,639858,tests performed,24332.28571
+United Kingdom,GBR,2021-02-01,655567,tests performed,23821.42857
+United Kingdom,GBR,2021-02-02,657452,tests performed,23355.57143
+United Kingdom,GBR,2021-02-03,662173,tests performed,22476.42857
+United Kingdom,GBR,2021-02-04,667279,tests performed,21322.57143
+United Kingdom,GBR,2021-02-05,668959,tests performed,19902.42857
+United Kingdom,GBR,2021-02-06,671571,tests performed,19182.85714
+United Kingdom,GBR,2021-02-07,671893,tests performed,18427.71429
+United Kingdom,GBR,2021-02-08,668797,tests performed,17780.57143
+United Kingdom,GBR,2021-02-09,665047,tests performed,17142.71429
+United Kingdom,GBR,2021-02-10,660874,tests performed,16265.85714
+United Kingdom,GBR,2021-02-11,654962,tests performed,15238.57143
+United Kingdom,GBR,2021-02-12,648611,tests performed,14666.28571
+United Kingdom,GBR,2021-02-13,641568,tests performed,13950.85714
+United Kingdom,GBR,2021-02-14,613502,tests performed,13249
+United Kingdom,GBR,2021-02-15,589320,tests performed,12625.85714
+United Kingdom,GBR,2021-02-16,576293,tests performed,12368
+United Kingdom,GBR,2021-02-17,548047,tests performed,12322.71429
+United Kingdom,GBR,2021-02-18,520649,tests performed,12115.85714
+United Kingdom,GBR,2021-02-19,504962,tests performed,11673.14286
+United Kingdom,GBR,2021-02-20,505104,tests performed,11258.57143
+United Kingdom,GBR,2021-02-21,532243,tests performed,11093.42857
+United Kingdom,GBR,2021-02-22,564448,tests performed,11219.57143
+United Kingdom,GBR,2021-02-23,580061,tests performed,10917.71429
+United Kingdom,GBR,2021-02-24,603850,tests performed,10515.85714
+United Kingdom,GBR,2021-02-25,631127,tests performed,10219.42857
+United Kingdom,GBR,2021-02-26,644068,tests performed,9717.85714
+United Kingdom,GBR,2021-02-27,640935,tests performed,9289.85714
+United Kingdom,GBR,2021-02-28,633301,tests performed,8749.85714
+United Kingdom,GBR,2021-03-01,642101,tests performed,8007.42857
+United Kingdom,GBR,2021-03-02,657448,tests performed,7705.71429
+United Kingdom,GBR,2021-03-03,676211,tests performed,7201.85714
+United Kingdom,GBR,2021-03-04,715431,tests performed,6719.57143
+United Kingdom,GBR,2021-03-05,769964,tests performed,6353.28571
+United Kingdom,GBR,2021-03-06,782445,tests performed,6162
+United Kingdom,GBR,2021-03-07,822186,tests performed,6048.42857
+United Kingdom,GBR,2021-03-08,942647,tests performed,5957.14286
+United Kingdom,GBR,2021-03-09,1051091,tests performed,5879.71429
+United Kingdom,GBR,2021-03-10,1161628,tests performed,5822.71429
+United Kingdom,GBR,2021-03-11,1260123,tests performed,5850
+United Kingdom,GBR,2021-03-12,1333016,tests performed,5944.28571
+United Kingdom,GBR,2021-03-13,1331439,tests performed,5872.71429
+United Kingdom,GBR,2021-03-14,1355333,tests performed,5792
+United Kingdom,GBR,2021-03-15,1365679,tests performed,5835.85714
+United Kingdom,GBR,2021-03-16,1356806,tests performed,5763.57143
+United Kingdom,GBR,2021-03-17,1366647,tests performed,5731
+United Kingdom,GBR,2021-03-18,1343727,tests performed,5659.14286
+United Kingdom,GBR,2021-03-19,1272080,tests performed,5400.28571
+United Kingdom,GBR,2021-03-20,1276733,tests performed,5403.42857
+United Kingdom,GBR,2021-03-21,1409016,tests performed,5497.85714
+United Kingdom,GBR,2021-03-22,1358254,tests performed,5537.42857
+United Kingdom,GBR,2021-03-23,1284510,tests performed,5545.14286
+United Kingdom,GBR,2021-03-24,1302858,tests performed,5521.28571
+United Kingdom,GBR,2021-03-25,1283434,tests performed,5513.42857
+United Kingdom,GBR,2021-03-26,1246158,tests performed,5708.14286
+United Kingdom,GBR,2021-03-27,1245621,tests performed,5461
+United Kingdom,GBR,2021-03-28,1209889,tests performed,5259.71429
+United Kingdom,GBR,2021-03-29,1165961,tests performed,5170.57143
+United Kingdom,GBR,2021-03-30,1140412,tests performed,4978.28571
+United Kingdom,GBR,2021-03-31,1063178,tests performed,4762.42857
+United Kingdom,GBR,2021-04-01,1011634,tests performed,4517.85714
+United Kingdom,GBR,2021-04-02,991602,tests performed,4116
+United Kingdom,GBR,2021-04-03,982949,tests performed,4046.71429
+United Kingdom,GBR,2021-04-04,865172,tests performed,3826.42857
+United Kingdom,GBR,2021-04-05,843988,tests performed,3547.57143
+United Kingdom,GBR,2021-04-06,841159,tests performed,3309.42857
+United Kingdom,GBR,2021-04-07,807357,tests performed,3121.14286
+United Kingdom,GBR,2021-04-08,803436,tests performed,2915.28571
+United Kingdom,GBR,2021-04-09,822386,tests performed,1742.57143
+United Kingdom,GBR,2021-04-10,833763,tests performed,1641
+United Kingdom,GBR,2021-04-11,892540,tests performed,1544.57143
+United Kingdom,GBR,2021-04-12,913897,tests performed,1666.71429
+United Kingdom,GBR,2021-04-13,919956,tests performed,1681.14286
+United Kingdom,GBR,2021-04-14,937846,tests performed,1642.85714
+United Kingdom,GBR,2021-04-15,947037,tests performed,1591.71429
+United Kingdom,GBR,2021-04-16,948625,tests performed,2676.57143
+United Kingdom,GBR,2021-04-17,950103,tests performed,2613.71429
+United Kingdom,GBR,2021-04-18,1015858,tests performed,2635.71429
+United Kingdom,GBR,2021-04-19,1043858,tests performed,2545.42857
+United Kingdom,GBR,2021-04-20,1053682,tests performed,2549
+United Kingdom,GBR,2021-04-21,1083648,tests performed,2534
+United Kingdom,GBR,2021-04-22,1105016,tests performed,2534
+United Kingdom,GBR,2021-04-23,1111525,tests performed,2526.42857
+United Kingdom,GBR,2021-04-24,1112639,tests performed,2504.85714
+United Kingdom,GBR,2021-04-25,1084296,tests performed,2483.28571
+United Kingdom,GBR,2021-04-26,1083897,tests performed,2349.71429
+United Kingdom,GBR,2021-04-27,1081940,tests performed,2373.57143
+United Kingdom,GBR,2021-04-28,1081067,tests performed,2331.71429
+United Kingdom,GBR,2021-04-29,1075614,tests performed,2287.85714
+United Kingdom,GBR,2020-02-02,,,0.66667
+United Kingdom,GBR,2020-02-03,,,2
+United Kingdom,GBR,2020-02-04,,,1.6
+United Kingdom,GBR,2020-02-05,,,1.5
+United Kingdom,GBR,2020-02-06,,,1.28571
+United Kingdom,GBR,2020-02-07,,,1
+United Kingdom,GBR,2020-02-08,,,1.57143
+United Kingdom,GBR,2020-02-09,,,1.71429
+United Kingdom,GBR,2020-02-10,,,0.85714
+United Kingdom,GBR,2020-02-11,,,1
+United Kingdom,GBR,2020-02-12,,,1
+United Kingdom,GBR,2020-02-13,,,1.14286
+United Kingdom,GBR,2020-02-14,,,1.28571
+United Kingdom,GBR,2020-02-15,,,0.71429
+United Kingdom,GBR,2020-02-16,,,0.57143
+United Kingdom,GBR,2020-02-17,,,0.71429
+United Kingdom,GBR,2020-02-18,,,0.57143
+United Kingdom,GBR,2020-02-19,,,0.57143
+United Kingdom,GBR,2020-02-20,,,0.71429
+United Kingdom,GBR,2020-02-21,,,0.71429
+United Kingdom,GBR,2020-02-22,,,0.71429
+United Kingdom,GBR,2020-02-23,,,1.42857
+United Kingdom,GBR,2020-02-24,,,1.57143
+United Kingdom,GBR,2020-02-25,,,2.14286
+United Kingdom,GBR,2020-02-26,,,2.42857
+United Kingdom,GBR,2020-02-27,,,3.14286
+United Kingdom,GBR,2020-02-28,,,4.71429
+United Kingdom,GBR,2020-02-29,,,5.42857
+United Kingdom,GBR,2020-03-01,,,9.42857
+United Kingdom,GBR,2020-03-02,,,14.85714
+United Kingdom,GBR,2020-03-03,,,22.14286
+United Kingdom,GBR,2020-03-04,,,29.85714
+United Kingdom,GBR,2020-03-05,,,35.85714
+United Kingdom,GBR,2020-03-06,,,45.42857
+United Kingdom,GBR,2020-03-07,,,52.57143
+United Kingdom,GBR,2020-03-08,,,55.57143
+United Kingdom,GBR,2020-03-09,,,70.85714
+United Kingdom,GBR,2020-03-10,,,100
+United Kingdom,GBR,2020-03-11,,,150.71429
+United Kingdom,GBR,2020-03-12,,,213.57143
+United Kingdom,GBR,2020-03-13,,,270.85714
+United Kingdom,GBR,2020-03-14,,,315
+United Kingdom,GBR,2020-03-15,,,370.57143
+United Kingdom,GBR,2020-03-16,,,437.42857
+United Kingdom,GBR,2020-03-17,,,510.42857
+United Kingdom,GBR,2020-03-18,,,595.28571
+United Kingdom,GBR,2020-03-19,,,677.71429
+United Kingdom,GBR,2020-03-20,,,788.85714
+United Kingdom,GBR,2020-03-21,,,910.42857
+United Kingdom,GBR,2020-03-22,,,1045.42857
+United Kingdom,GBR,2020-03-23,,,1293.14286
+United Kingdom,GBR,2020-03-24,,,1523.42857
+United Kingdom,GBR,2020-03-25,,,1767.85714
+United Kingdom,GBR,2020-03-26,,,2062.28571
+United Kingdom,GBR,2020-03-27,,,2346.71429
+United Kingdom,GBR,2020-03-28,,,2579.28571
+United Kingdom,GBR,2020-03-29,,,2794.14286
+United Kingdom,GBR,2020-03-30,,,3076.71429
+United Kingdom,GBR,2020-03-31,,,3384.14286
+United Kingdom,GBR,2020-04-01,,,3706.57143
+United Kingdom,GBR,2020-04-02,,,3964
+United Kingdom,GBR,2020-04-03,,,4211.42857
+United Kingdom,GBR,2020-04-04,,,4387.14286
+United Kingdom,GBR,2020-04-05,,,4495.42857
+United Kingdom,GBR,2020-04-06,,,4636.71429
+United Kingdom,GBR,2021-04-30,,,2236.85714
+United Kingdom,GBR,2021-05-01,,,2206.71429
+United Kingdom,GBR,2021-05-02,,,2198.28571
+United Kingdom,GBR,2021-05-03,,,2134.71429
+United Kingdom,GBR,2021-05-04,,,2032.85714
