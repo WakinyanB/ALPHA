@@ -12,7 +12,7 @@ All data used in the scripts are in the 'Data' folder.
 
 ### covid-stringency-index.csv
 
-Stringency Index (from 21/01/2020 to 23/03/2021), computed by the Oxford COVID-19 Government Response Tracker (OxCGRT) [[Hale *et al.*, 2021](https://doi.org/10.1038/s41562-021-01079-8)]. This file was originally downloaded from the website *Our World in Data* but does not seem to be available there anymore. Values can however be found directly in the GitHub repositery of OxCGRT 'covid-policy-tracker' (https://github.com/OxCGRT/covid-policy-tracker).
+Stringency Index (from 21/01/2020 to 23/03/2021), computed by the Oxford COVID-19 Government Response Tracker (OxCGRT) [[Hale *et al.*, 2021](https://doi.org/10.1038/s41562-021-01079-8)]. This file was originally downloaded from the website *Our World in Data* but does not seem to be available there anymore. Values from old databases can however be found in a GitHub repositery of OxCGRT: 'covid-policy-tracker-legacy' (https://github.com/OxCGRT/covid-policy-tracker-legacy).
 
 ### daily-tests-and-daily-new-confirmed-covid-cases.csv
 
