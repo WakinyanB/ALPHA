@@ -37,7 +37,7 @@ https://coronavirus.data.gov.uk/details/deaths (see 'Daily deaths with COVID-19 
 
 All the scripts are in the root directory of this repositery. We developed a two-step approach based on a SEIR model and the analysis of a combination of epidemiological and evolutionary information:
 
-(1) In the first step, we infer how the Stringency Index reduces the amount of viral transmission just before the emergence of the Alpha Variant;
+(1) In the first step, we infer how the Stringency Index reduces the amount of viral transmission - assuming that it wouldn't affect the duration of infectiousness - just before the emergence of the Alpha Variant;
 
 Scripts:
 - **STEP1_functions.R** (script with functions used in the first step)
