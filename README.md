@@ -8,7 +8,7 @@ CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France
 
 ## Data (sources and short descriptions)
 
-This is previously publicly available data that were downloaded from the Internet. All data used in the scripts are in the 'Data' folder. 
+This is previously publicly available data that were downloaded from the Internet. All data used in the scripts are in the 'Data' folder (and may also be found from the sources mentioned below). 
 
 ### covid-stringency-index.csv
 
