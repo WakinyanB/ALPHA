@@ -11,7 +11,7 @@ This is previously publicly available data that were downloaded from the Interne
 
 ### covid-stringency-index.csv
 
-&#11169;&emsp; Stringency Index (from 21/01/2020 to 23/03/2021), computed by the Oxford COVID-19 Government Response Tracker (OxCGRT) [[Hale *et al.*, 2021](https://doi.org/10.1038/s41562-021-01079-8)]. This file was originally downloaded from the website [*Our World in Data*](https://ourworldindata.org/) but does not seem to be available there anymore... However, values from old databases can still be found in a GitHub repositery of OxCGRT: '[covid-policy-tracker-legacy](https://github.com/OxCGRT/covid-policy-tracker-legacy)' (see 'Legacy OxCGRT dataset (retired July 2022)'). Although 184 countries are included in this file, we only used values of the Stringency Index in the UK (`Entity == "United Kingdom"`).
+&#11169;&emsp; Stringency Index (from 21/01/2020 to 23/03/2021), computed by the Oxford COVID-19 Government Response Tracker (OxCGRT) [[Hale *et al.*, 2021](https://doi.org/10.1038/s41562-021-01079-8)]. This file was originally downloaded from the website [*Our World in Data*](https://ourworldindata.org/) but does not seem to be available there anymore... However, values from old databases can still be found in a GitHub repositery of OxCGRT: '[covid-policy-tracker-legacy](https://github.com/OxCGRT/covid-policy-tracker-legacy)' (see 'Legacy OxCGRT dataset (retired July 2022)'). Although 184 countries are included in this file, we only used the Stringency Index in the UK (`Entity == "United Kingdom"`).
 
 ### daily-tests-and-daily-new-confirmed-covid-cases.csv
 
