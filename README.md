@@ -2,9 +2,8 @@
 
 **Phenotypic evolution of SARS-CoV-2: a statistical inference approach**
 
-Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon
-
-CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France
+Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon<br>
+*CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France*
 
 ## Data (sources and short descriptions)
 
@@ -30,15 +29,9 @@ https://coronavirus.data.gov.uk/details/deaths (see 'Daily deaths with COVID-19 
 
 &#11169;&emsp; Fequencies of S-Gene Target Failures (SGTF) in the 9 regions of England; underlying data from *Public Health England* [*Technical Briefing 5: Investigation of novel SARS-CoV-2 variant - Variant of Concern 202012/01*](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/959426/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5.pdf).
 
-
-
-(All PHE technical briefings dealing with the investigation of SARS-CoV-2 variants may be found on *GOV.UK*:
-
-Technical briefings 1 to 23:
-https://www.gov.uk/government/publications/investigation-of-novel-sars-cov-2-variant-variant-of-concern-20201201
-
-From technical briefing 24:
-https://www.gov.uk/government/publications/investigation-of-sars-cov-2-variants-technical-briefings)
+<sub>(All PHE technical briefings dealing with the investigation of SARS-CoV-2 variants may be found on *GOV.UK*:</sub><br>
+<sub>Technical briefings 1 to 23: https://www.gov.uk/government/publications/investigation-of-novel-sars-cov-2-variant-variant-of-concern-20201201</sub><br>
+<sub>From technical briefing 24: https://www.gov.uk/government/publications/investigation-of-sars-cov-2-variants-technical-briefings)</sub>
 
 ## R codes
 
