@@ -12,16 +12,16 @@ This is previously publicly available data that were downloaded from the Interne
 
 ### covid-stringency-index.csv
 
-&#11169;&emsp; Stringency Index (from 21/01/2020 to 23/03/2021), computed by the Oxford COVID-19 Government Response Tracker (OxCGRT) [[Hale *et al.*, 2021](https://doi.org/10.1038/s41562-021-01079-8)]. This file was originally downloaded from the website *Our World in Data* but does not seem to be available there anymore... However, values from old databases can still be found in a GitHub repositery of OxCGRT: '[covid-policy-tracker-legacy](https://github.com/OxCGRT/covid-policy-tracker-legacy)'.
+&#11169;&emsp; Stringency Index (from 21/01/2020 to 23/03/2021), computed by the Oxford COVID-19 Government Response Tracker (OxCGRT) [[Hale *et al.*, 2021](https://doi.org/10.1038/s41562-021-01079-8)]. This file was originally downloaded from the website *Our World in Data* but does not seem to be available there anymore... However, values from old databases can still be found in a GitHub repositery of OxCGRT: '[covid-policy-tracker-legacy](https://github.com/OxCGRT/covid-policy-tracker-legacy)'. 184 countries are included in this file, we only used values of the Stringency Index in the UK (`Entity == "United Kingdom"`).
 
 ### daily-tests-and-daily-new-confirmed-covid-cases.csv
 
-&#11169;&emsp; Daily number of tests with new cases tested positive (from 07/04/2020 to 28/04/2021), downloaded from *Our World in Data*:
+&#11169;&emsp; Daily number of tests with new cases tested positive in the UK (from 07/04/2020 to 28/04/2021), downloaded from *Our World in Data*:
 https://ourworldindata.org/grapher/daily-tests-and-daily-new-confirmed-covid-cases?country=~GBR
 
 ### data_daily_deaths_UK_2021_May_05.csv
 
-&#11169;&emsp; Daily new fatality cases (from 02/02/2020 to 23/04/2021), downloaded from *GOV.UK* (visited 05/05/2021):
+&#11169;&emsp; Daily new fatality cases in the UK (from 02/02/2020 to 23/04/2021), downloaded from *GOV.UK* (visited 05/05/2021):
 https://coronavirus.data.gov.uk/details/deaths (see 'Daily deaths with COVID-19 on the death certificate by date of death').
 
 ### Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods
