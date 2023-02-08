@@ -6,7 +6,7 @@ Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon
 
 CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France
 
-## Data
+## Data (sources and short descriptions)
 
 This is previously publicly available data that were downloaded from the Internet. All data used in the scripts are in the 'Data' folder. 
 
