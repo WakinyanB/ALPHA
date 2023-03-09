@@ -32,7 +32,7 @@ https://coronavirus.data.gov.uk/details/deaths (see 'Daily deaths with COVID-19 
 
 ## R codes
 
-All the scripts are in the root directory of this repositery. We developed a two-step approach based on a SEIR model and the analysis of a combination of epidemiological and evolutionary information:
+All the scripts are in the root directory of this repositery. We developed a two-step approach based on an SEIR model and the analysis of a combination of epidemiological and evolutionary information:
 
 (1) In the first step, we infer how the Stringency Index reduces the amount of viral transmission - assuming that it wouldn't affect the duration of infectiousness - just before the emergence of the Alpha Variant;
 
