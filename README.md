@@ -2,9 +2,6 @@
 
 **Phenotypic evolution of SARS-CoV-2: a statistical inference approach**
 
-Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon<br>
-*CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France*
-
 ## Data (sources and short descriptions)
 
 This is previously publicly available data that were downloaded from the Internet. All data used in the scripts are in the 'Data' folder (and may also be found from the sources mentioned below). 
