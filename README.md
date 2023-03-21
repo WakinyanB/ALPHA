@@ -41,7 +41,7 @@ Scripts:
 - **STEP1_Script_UK_data.Rmd** (analyses using the UK data)
 - **STEP1_Identifiability_profiles.Rmd** (build and plot identifiability profiles of the model)
 
-(2) In the second step, based on a novel theoretical derivation of the selection gradient in a SEIR model, we infer the phenotype of the Alpha variant from the analysis of the change in its logit-frequency.
+(2) In the second step, based on a novel theoretical derivation of the selection gradient in an SEIR model, we infer the phenotype of the Alpha variant in terms of transmission and recovery from the analysis of the change in its logit-frequency.
 
 Scripts:
 - **STEP2_functions.R** (script with functions used in the second step)
