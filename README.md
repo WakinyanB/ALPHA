@@ -54,7 +54,7 @@ In addition:
 - **Selection_coefficient_vs_Stringency_Index.R** explores the correlation between the selection coefficient of the Alpha variant and the Stringency Index in the UK; the script generates Fig. S2
 - **Fig_2step_analysis_with_real_data.R** generates Fig. 1
 - **Fig_Spread_variant_B117_UK.R** generates Fig. S1
-- **selection_vs_Reproduction_number.R** explores the relationship between the growth rate of the epidemic and the effective reproduction number using the framework of  [Blanquart *et al.*, 2022](https://doi.org/10.7554/eLife.75791); the script generates Fig. S13
+- **selection_vs_Reproduction_number.R** plots the relationship between the growth rate of the epidemic and the effective reproduction number using the framework of  [Blanquart *et al.*, 2022](https://doi.org/10.7554/eLife.75791); the script generates Fig. S13
 
 ---
 
