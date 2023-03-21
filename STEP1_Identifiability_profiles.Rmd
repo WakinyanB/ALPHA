@@ -1,0 +1,339 @@
+---
+title: "**------ Step 1 - Identifiability profiles ------**"
+subtitle: "**Phenotypic evolution of SARS-CoV-2: a statistical inference approach**"
+author:  | 
+  | Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon
+  |
+  | *CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France*
+  |
+date: "November 2021"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+    number_sections: yes
+    highlight: tango
+header-includes: 
+  - \renewcommand{\contentsname}{Table of contents}
+  - \usepackage{mathtools}
+encoding: UTF-8
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      fig.align = "center",
+                      message = FALSE,
+                      warning = FALSE,
+                      results='hide')
+
+```
+\newpage
+# Initialisation
+
+```{r}
+# Cleaning objects from the workplace
+rm(list=ls())
+
+Sys.setlocale("LC_TIME", "English")
+
+# Packages (may first require installations: install.packages())
+library(tidyverse)
+library(plyr)
+library(ggplot2)
+library(gridExtra)
+library(cowplot)
+library(deSolve)
+library(boot)
+library(scales)
+library(knitr)
+library(crayon)
+library(lubridate)
+library(readODS)
+library(ggpubr)
+library(corrplot)
+
+# Execute functions from external R script
+source("STEP1_functions.R")
+```
+
+# $\boldsymbol{SEIR}$ model
+
+\begin{align*}
+    \begin{dcases}
+        \dot{S}(t) &= -(1-c(t))\beta S(t)\frac{I(t)}{N}\\
+        \dot{E}(t) &= (1-c(t))\beta S(t)\frac{I(t)}{N} - \kappa E(t)\\
+        \dot{I}_A(t) &= (1-\omega) \kappa E(t) - \gamma I_A(t)\\
+        \dot{I}_{Sr}(t) &= (1-p)\omega\kappa E(t) - \gamma I_{Sr}(t)\\
+        \dot{I}_{Sd}(t) &= p \omega\kappa E(t) - \alpha I_{Sd}(t)\\
+        \dot{R}(t) &= \gamma \Big(I_A(t)+I_{Sr}(t)\Big)\\
+        \dot{D}(t) &= \alpha I_{Sd}(t)
+    \end{dcases} \label{model_SEIR_phase1}
+\end{align*}
+
+\noindent The basic reproduction number is then given by:
+$$\mathcal{R}_0 = \beta \Bigg(\frac{1 - \omega p}{\gamma} + \frac{\omega p}{\alpha} \Bigg) \approx \frac{\beta}{\gamma}$$
+
+# Simulated data
+
+## Initial values of state variable & parameters
+
+```{r}
+N <- 67886011 # estimation of the size of the population in the UK by mid-2020
+
+# Initial values of state variables
+
+pS <- 0.9 # S(t0)/N
+pE <- 8e-4 # E(t0)/N
+pIA <- 8.6e-4 # I_A(t0)/N
+pISr <- 7.35e-5 # I_Sr(t0)/N 
+pISd <- 1.5e-06 # I_Sd(t0)/N
+pR <- 1-(pS+pE+pIA+pISr+pISd) # R(t0)/N
+
+init <- c("S"=pS, "E"=pE, "IA"=pIA, "ISr"=pISr, "ISd"=pISd, "R"=pR)*N
+init <- init %>% c("D"=0, "IS_cumul"=0) # add initial values for deaths and cumulated IS
+
+# Parameters
+
+kappa <- 0.2 # mean duration of incubation period: around 5 days
+gamma <- 0.1 # mean duration of infectiousness: around 10 days
+beta <- 0.25
+k <- 0.99
+a <- 3.78
+alpha <- 0.1
+omega <- 0.08
+p <- 0.02
+eta <- 3.2e-5
+mu <- 2.3e-3
+
+R0 <- beta*(omega*p/alpha + (1-omega*p)/gamma) # Basic reproduction number of the WT strain
+R0_approx <- beta/gamma
+
+theta <- c("beta"=beta, "kappa"=kappa, "gamma"=gamma, "alpha"=alpha, "omega"=omega, "p"=p,
+           "k"=k, "a"=a, "eta"=eta, "mu"=mu)
+```
+
+## Time points
+
+```{r}
+T0 <- ymd("2020-08-02")
+Tf <- ymd("2020-11-08")
+
+dates <- seq(T0, Tf, by = '1 day')
+
+n_time <- length(dates)
+```
+
+## Stringency Index (real values)
+
+```{r}
+stringency_index <- read.csv("Data/covid-stringency-index.csv", header = TRUE)
+stringency_index <- stringency_index[which(stringency_index$Entity == "United Kingdom"), c(3,4)]
+colnames(stringency_index) <- c("date", "stringency_index")
+stringency_index$date <- ymd(stringency_index$date)
+
+SI <- stringency_index$stringency_index[match(dates, stringency_index$date)]
+theta$stringency_index <- SI
+```
+
+## Numerical simulation
+
+```{r}
+simul_SEIR <- ode(y = init, times = 0:(Tf-T0), parms = theta, func = ODE_phase1, method = "ode45")
+
+d <- dim(simul_SEIR)[1]
+rho <- mu + eta*simul_SEIR[-1,1] # reporting rate (linear in time)
+
+set.seed(123)
+noise_neg <- rnorm(n = n_time-1, mean = 0, sd = 5000)
+noise_pos <- rnorm(n = n_time-1, mean = 0, sd = 500)
+noise_deaths <- rnorm(n = n_time-1, mean = 0, sd = 5)
+
+simul_data <- data.frame("Date" = dates[-1],
+                         "negative_tests" = rho*simul_SEIR[-1,2] + noise_neg,
+                         "positive_tests" = (simul_SEIR[-1,9]-simul_SEIR[-d,9]) +
+                           rho*simul_SEIR[-1,4] + noise_pos,
+                         "deaths" = simul_SEIR[-1,8]-simul_SEIR[-d,8] + noise_deaths)
+
+simul_data[simul_data < 0] <- 0
+```
+
+## Graphical visualisations
+
+```{r, fig.height=7, fig.width=9}
+theme_data <- theme_bw() + theme(axis.text.x = element_text(size=11),
+                                 axis.text.y = element_text(size=11, angle = 45),
+                                 axis.title.x = element_blank(), legend.position = 'top')
+
+Fig_neg_tests <- ggplot(simul_data, aes(x = Date, y = negative_tests)) +
+  geom_col(fill = "#00BFC4") +
+  ylab("Daily number of new negative tests") +
+  scale_x_date(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+
+Fig_pos_tests <- ggplot(simul_data, aes(x = Date, y = positive_tests)) +
+  geom_col(fill = "#F8766D") +
+  ylab("Daily number of new positive tests") +
+  scale_x_date(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+
+Fig_deaths <- ggplot(simul_data, aes(x = Date, y = deaths)) +
+  geom_col(fill = "darkgray") +
+  ylab("Daily new fatality cases with Covid-19\n on the death certificate by date of death") +
+  scale_x_date(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+  
+Fig_stringency_index <- ggplot(data.frame("Date" = dates+1, "Stringency_Index" = SI),
+                               aes(x = Date, y = Stringency_Index)) +
+  geom_step(cex = 1.3, col = "darkred") +
+  ylab("Stringency Index \n") +
+  ylim(c(40,90)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=11), axis.text.y = element_text(size=11))
+  
+grid.arrange(plot_grid(Fig_neg_tests, Fig_pos_tests, Fig_deaths, ncol = 3, nrow = 1),
+             Fig_stringency_index, ncol = 1, nrow = 2, heights = c(0.6,0.4),
+             bottom = "Time series dealing with simulated data: daily new negative tests (top left), positive tests (top middle),
+fatality cases (top right), and Stringency Index in the UK (bottom).")
+```
+
+# Identifiability profiles
+
+## Computations
+
+```{r, eval = FALSE}
+constants <- c("pS" = pS, "kappa" = kappa, "gamma" = gamma, "R0" = R0_approx)
+parm_optim <- c("pE" = pE, "alpha"=alpha, "omega"=omega, "p"=p, "k"=k, "a"=a, "eta"=eta, "mu"=mu)
+
+n <- 100
+
+x_pE <- seq(from=0, to=0.01, length.out=n)
+
+pE_profile <- Identifiability_profile(parm_name = "pE", x = x_pE,
+                                   parm_optim = parm_optim[-(which(names(parm_optim) == "pE"))],
+                                   constants = constants, approx_init_I = TRUE, times = 0:(Tf-T0),
+                                   N = N, stringency_index = SI, data_obs = simul_data[,-1])
+
+x_alpha <- seq(from=0.01, to=1, length.out=n)
+
+alpha_profile <- Identifiability_profile(parm_name = "alpha", x = x_alpha,
+                                      parm_optim = parm_optim[-(which(names(parm_optim) == "alpha"))],
+                                      constants = constants, approx_init_I = TRUE, times = 0:(Tf-T0),
+                                      N = N, stringency_index = SI, data_obs = simul_data[,-1])
+
+x_omega <- seq(from=0.01, to=1, length.out=n)
+
+omega_profile <- Identifiability_profile(parm_name = "omega", x = x_omega,
+                                      parm_optim = parm_optim[-(which(names(parm_optim) == "omega"))],
+                                      constants = constants, approx_init_I = TRUE, times = 0:(Tf-T0),
+                                      N = N, stringency_index = SI, data_obs = simul_data[,-1])
+
+x_p <- seq(from=0.01, to=0.2, length.out=n)
+
+p_profile <- Identifiability_profile(parm_name = "p", x = x_p,
+                                  parm_optim = parm_optim[-(which(names(parm_optim) == "p"))],
+                                  constants = constants, approx_init_I = TRUE, times = 0:(Tf-T0),
+                                  N = N, stringency_index = SI, data_obs = simul_data[,-1])
+
+x_k <- seq(from=0.01, to=1, length.out=n)
+
+k_profile <- Identifiability_profile(parm_name = "k", x = x_k,
+                                  parm_optim = parm_optim[-(which(names(parm_optim) == "k"))],
+                                  constants = constants, approx_init_I = TRUE, times = 0:(Tf-T0),
+                                  N = N, stringency_index = SI, data_obs = simul_data[,-1])
+
+x_a <- seq(from=0.1, to=10, length.out=n)
+
+a_profile <- Identifiability_profile(parm_name = "a", x = x_a,
+                                  parm_optim = parm_optim[-(which(names(parm_optim) == "a"))],
+                                  constants = constants, approx_init_I = TRUE, times = 0:(Tf-T0),
+                                  N = N, stringency_index = SI, data_obs = simul_data[,-1])
+
+x_eta <- seq(from=0, to=1e-3, length.out=n)
+
+eta_profile <- Identifiability_profile(parm_name = "eta", x = x_eta,
+                                    parm_optim = parm_optim[-(which(names(parm_optim) == "eta"))],
+                                    constants = constants, approx_init_I = TRUE, times = 0:(Tf-T0),
+                                    N = N, stringency_index = SI, data_obs = simul_data[,-1])
+
+x_mu <- seq(from=0, to=0.01, length.out=n)
+
+mu_profile <- Identifiability_profile(parm_name = "mu", x = x_mu,
+                                   parm_optim = parm_optim[-(which(names(parm_optim) == "mu"))],
+                                   constants = constants, approx_init_I = TRUE, times = 0:(Tf-T0),
+                                   N = N, stringency_index = SI, data_obs = simul_data[,-1])
+```
+
+```{r, eval = FALSE, echo = FALSE}
+file_name <- c("CSV_output_files/Identifiability_profile_",
+               "_pS09_gamma01_kappa02_R025_norm_noise_sd5000_500_5.csv")
+
+# write.csv(pE_profile, row.names = FALSE, file = paste(file_name, collapse = "pE"))
+# write.csv(alpha_profile, row.names = FALSE, file = paste(file_name, collapse = "alpha"))
+# write.csv(omega_profile, row.names = FALSE, file = paste(file_name, collapse = "omega"))
+# write.csv(p_profile, row.names = FALSE, file = paste(file_name, collapse = "p"))
+# write.csv(k_profile, row.names = FALSE, file = paste(file_name, collapse = "k"))
+# write.csv(a_profile, row.names = FALSE, file = paste(file_name, collapse = "a"))
+# write.csv(eta_profile, row.names = FALSE, file = paste(file_name, collapse = "eta"))
+# write.csv(mu_profile, row.names = FALSE, file = paste(file_name, collapse = "mu"))
+```
+
+```{r, echo = FALSE}
+file_name <- c("CSV_output_files/Identifiability_profile_",
+               "_pS09_gamma01_kappa02_R025_norm_noise_sd5000_500_5.csv")
+
+pE_profile <- read.csv(paste(file_name, collapse = "pE"), header = TRUE)
+alpha_profile <- read.csv(paste(file_name, collapse = "alpha"), header = TRUE)
+omega_profile <- read.csv(paste(file_name, collapse = "omega"), header = TRUE)
+p_profile <- read.csv(paste(file_name, collapse = "p"), header = TRUE)
+k_profile <- read.csv(paste(file_name, collapse = "k"), header = TRUE)
+a_profile <- read.csv(paste(file_name, collapse = "a"), header = TRUE)
+eta_profile <- read.csv(paste(file_name, collapse = "eta"), header = TRUE)
+mu_profile <- read.csv(paste(file_name, collapse = "mu"), header = TRUE)
+```
+
+## Graphical vizualisations
+
+```{r, fig.height=11, fig.width=8}
+# pdf 8.5 x 11 inches (US letter portrait)
+
+plot_grid(ggplot() + theme_void(), ggplot() + theme_void(),
+          plot_profile(expression(E(t[0])/N), pE_profile, real_value = pE, log = TRUE) +
+            scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+            scale_x_continuous(label=function(x){
+              parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}) +
+            theme(axis.title.x = element_text(size = 10)),
+          plot_profile(expression(omega), omega_profile, real_value = omega, log = TRUE) +
+            scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+            scale_x_continuous(breaks = seq(0,1,0.1)) +
+            theme(axis.title.y = element_blank()),
+          plot_profile("p", p_profile, real_value = p, log = TRUE) +
+            scale_y_continuous(labels = scales::label_number(accuracy = 0.1)),
+          plot_profile(expression(alpha), alpha_profile, real_value = alpha, log = TRUE) +
+            scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+            scale_x_continuous(breaks = seq(0,1,0.1)) +
+            theme(axis.title.y = element_blank()),
+          plot_profile("k", k_profile, real_value = k, log = TRUE) +
+            scale_x_continuous(breaks = seq(0,1,0.1)) +
+            scale_y_continuous(labels = scales::label_number(accuracy = 0.1)),
+          plot_profile("a", a_profile, real_value = a, log = TRUE) +
+            scale_x_continuous(breaks = seq(0,10,1)) +
+            scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+            theme(axis.title.y = element_blank()),
+          plot_profile(expression(eta), eta_profile, real_value = eta, log = TRUE) +
+            scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+            scale_x_continuous(label=function(x){
+              parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}),
+          plot_profile(expression(mu), mu_profile, real_value = mu, log = TRUE) +
+            scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+            scale_x_continuous(label=function(x){
+              parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}) +
+            theme(axis.title.y = element_blank()),
+          labels = c(rep("", 2), paste0(LETTERS[1:8], ")")),
+          label_x = c(0.05, -0.03), label_y = 1.125,
+          rel_heights = c(0.15,rep(1,4)), ncol = 2, nrow = 5)
+```

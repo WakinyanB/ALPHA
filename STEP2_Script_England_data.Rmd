@@ -1,0 +1,658 @@
+---
+title: "**------ STEP 2 ------**"
+subtitle: "**Phenotypic evolution of SARS-CoV-2: a statistical inference approach**"
+author:  | 
+  | Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon
+  |
+  | *CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France*
+  |
+date: "March 2021"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+    number_sections: yes
+    highlight: tango
+header-includes: 
+  - \renewcommand{\contentsname}{Table of contents}
+  - \usepackage{mathtools}
+encoding: UTF-8
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      fig.align = "center",
+                      message = FALSE,
+                      warning = FALSE,
+                      results='show')
+```
+\newpage
+
+# Initialisation
+
+```{r, results='hide'}
+# Cleaning objects from the workplace
+rm(list=ls())
+
+Sys.setlocale("LC_TIME", "English")
+
+# Packages (may first require installations: install.packages())
+library(readODS) # to read ODS files
+library(lubridate) # to convert into dates
+## Data manipulation
+library(tidyverse)
+library(plyr)
+## Plots
+library(ggplot2)
+library(scales)
+library(gridExtra)
+library(cowplot)
+library(ggpubr)
+library(pdftools)
+## Colors and palettes
+library(RColorBrewer)
+library(lattice)
+library(viridis)
+##
+library(deSolve) # to (numerically) integrate a system of ODEs
+library(boot) # for functions 'logit' and 'inv.logit'
+library(knitr) # to draw nice tables
+library(nlme) # to estimate with correlated residuals
+
+# Execute functions from external R script
+source("STEP2_functions.R")
+```
+
+# Mathematical modeling
+
+Let's assume $\alpha_m = \alpha_w = 0$ and $\kappa_m = \kappa_w = \kappa$. Then, the logit-frequency of the variant in the system may be approximated as follows:
+
+\begin{align*}
+  \frac{d\text{ logit}(\widetilde{f}_m(t))}{dt} &\approx \frac{2 \kappa (1-c(t)) \Delta\beta S(t)/N - (\kappa-\overline{\gamma}(t)) \Delta\gamma - 2~~\sqrt{\Bigg(\kappa - \overline{\gamma}(t)\Bigg)^2 + 4 \kappa (1 - c(t))\overline{\beta}(t)S(t)/N}~~\Delta\gamma}{2~~\sqrt{\Bigg(\kappa - \overline{\gamma}(t)\Bigg)^2 + 4 \kappa (1 - c(t))\overline{\beta}(t)S(t)/N}}\\
+  &= \frac{\kappa (1-c(t))S(t)/N}{\sqrt{\Bigg(\kappa - \overline{\gamma}(t)\Bigg)^2 + 4 \kappa (1 - c(t))\overline{\beta}(t)S(t)/N}} \Delta\beta - \frac{\kappa - \overline{\gamma}(t) + \sqrt{\Bigg(\kappa - \overline{\gamma}(t)\Bigg)^2 + 4 \kappa (1 - c(t))\overline{\beta}(t)S(t)/N}}{2~~\sqrt{\Bigg(\kappa - \overline{\gamma}(t)\Bigg)^2 + 4 \kappa (1 - c(t))\overline{\beta}(t)S(t)/N}} \Delta\gamma
+\end{align*}
+
+With : $c(t) = k \Bigg(\frac{\psi(t)}{100}\Bigg)^a$
+
+Thus, the expression of $\text{logit}(\widetilde{f}_m(t))$ may be written such that:
+
+\begin{align*}
+  \text{logit}(\widetilde{f}_m(t)) \approx \text{logit}(\widetilde{f}_m(t_0)) &+ \int_{t_0}^{t} \Bigg(\frac{\kappa (1-c(t))S(t)/N}{\sqrt{(\kappa - \overline{\gamma}(t))^2 + 4 \kappa (1 - c(t))\overline{\beta}(t)S(t)/N}} \Bigg)\,dt ~~ \Delta\beta \\ &- \int_{t_0}^{t} \Bigg(\frac{\kappa - \overline{\gamma}(t) + \sqrt{(\kappa - \overline{\gamma}(t))^2 + 4 \kappa (1 - c(t))\overline{\beta}(t)S(t)/N}}{2~~\sqrt{(\kappa - \overline{\gamma}(t))^2 + 4 \kappa (1 - c(t))\overline{\beta}(t)S(t)/N}}\Bigg) \,dt ~~ \Delta\gamma
+\end{align*}
+\medskip
+
+We also assume that $\overline{\gamma}(t) \approx \gamma_w$, $\overline{\beta}(t) \approx \beta_w$ and $S(t)/N \approx S/N \quad (=S(t_0)/N)$. Then:
+\begin{align*}
+  \text{logit}(\widetilde{f}_m(t)) \approx \text{logit}(\widetilde{f}_m(t_0)) &+ \kappa \int_{t_0}^{t} \Bigg( \frac{(1-c(t))}{\sqrt{(\kappa - \gamma_w)^2 + 4 \kappa (1 - c(t))\beta_w S/N}}\Bigg) \,dt ~~ \Delta\beta \frac{S}{N} \\ &- \frac{1}{2} \Bigg[(\kappa - \gamma_w)\int_{t_0}^{t} \Bigg(\frac{1}{\sqrt{(\kappa - \gamma_w)^2 + 4 \kappa (1 - c(t))\beta_w S/N}}\Bigg) \,dt + \Delta t \Bigg] ~ \Delta\gamma
+\end{align*}
+
+With: $\Delta t = t - t_0$
+
+\begin{align*}
+  \text{logit}(\widetilde{f}_m(t)) \approx \text{logit}(\widetilde{f}_m(t_0)) &+ \kappa \int_{t_0}^{t} \Bigg( \frac{(1-c(t))}{\sqrt{(\kappa - \gamma_w)^2 + 4 \kappa (1 - c(t))\beta_w S/N}}\Bigg) \,dt ~~ \Delta\beta \frac{S}{N}\\& - \frac{1}{2} \Bigg[(\kappa - \gamma_w)\int_{t_0}^{t} \Bigg(\frac{1}{\sqrt{(\kappa - \gamma_w)^2 + 4 \kappa (1 - c(t))\beta_w S/N}}\Bigg) \,dt + \Delta t \Bigg] ~ \Delta\gamma
+\end{align*}
+\newpage
+
+# Data import, processing and graphical visualisation (England)
+
+## Sources
+
+Genotypic frequencies: \textbf{Public Health England Technical Briefing 5}
+
+[https://www.gov.uk/government/publications/investigation-of-novel-sars-cov-2-variant-variant-of-concern-20201201](https://www.gov.uk/government/publications/investigation-of-novel-sars-cov-2-variant-variant-of-concern-20201201)
+
+[https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/957631/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/957631/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods)
+
+\textbf{NB:} Starting dates of this phase (that is, phase 2: after the emergence of lineage B.1.1.7) correspond to the regional dates for which the variant exceeds $10 \%$ among the cases tested positive.
+
+## Data import
+
+```{r}
+# Genotype frequencies at regional scale (ods file)
+data_region <- read_ods("Data/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods",
+                        sheet = 6, col_names = TRUE)
+
+# Stringency Index (csv file)
+Stringency_Index <- read.csv("Data/covid-stringency-index.csv")
+```
+
+## Data processing
+
+```{r}
+data_region$Region <- as.factor(data_region$Region) # from 'characters' to 'factors'
+data_region$week <- dmy(data_region$week) # from 'characters' to 'dates'
+```
+
+```{r}
+Stringency_Index <-Stringency_Index[Stringency_Index$Entity=="United Kingdom",-2]
+Stringency_Index$Day <- ymd(Stringency_Index$Day)
+
+# Only data associated with the studied period are retained
+Stringency_Index <- Stringency_Index[match(seq.Date(min(data_region$week),
+                                                    max(data_region$week) + 7, by='1 day'),
+                                           Stringency_Index$Day),-1]
+```
+
+```{r}
+dim_region <- dim(data_region)
+Regions <- data_region$Region %>% unique %>% as.character
+N_regions <- length(Regions)
+threshold <- 0.1 # Minimum threshold of frequency of the variant among cases tested positive
+# frequencies below this threshold are not considered (stochastic dynamics)
+```
+
+```{r}
+plot_tab_region <- data.frame("Region" = data_region$Region %>% rep(2),
+                              "Date" = (data_region$week + 3) %>% rep(2),
+                              "Numbers" = c(data_region$`n_Confirmed S-gene`,
+                                            data_region$`n_Confirmed SGTF`),
+                              "Percentage" = c(data_region$`percent_Confirmed S-gene`/100,
+                                              data_region$`percent_Confirmed SGTF`/100),
+                              "Legend" = c(rep("Confirmed S-gene", dim_region[1]),
+                                           rep("Confirmed SGTF", dim_region[1])))
+
+data_fm_region <- data_region[,c(1,2,6)]
+data_fm_region$fm <- data_fm_region$`percent_Confirmed SGTF`/100
+
+data_fm_region$logit_fm <- data_fm_region$fm %>% logit
+
+subdata_fm_region <- subset(data_fm_region, fm >= threshold)
+subdata_fm_region$t <- ((subdata_fm_region$week - min(data_region$week)) + 3.5) %>% as.numeric
+# Data are pooled by week and associated (by default) with the date of Monday.
+# Here, we associate them with Thursday at noon (+3.5 days after Monday), i.e. the middle of the week.
+
+logit_fm_0 <- subdata_fm_region %>% ddply(~Region, function(x){return(x$logit_fm[1])})
+colnames(logit_fm_0)[2] <- "logit_fm_0"
+```
+
+## Values for fixed parameters
+
+```{r, fig.width=9, fig.height=3}
+kappa = 0.2
+beta_w = 0.25
+gamma_w = 0.1
+SN = 0.75
+
+# Values for parameters of the control (k and a) from Wild Bootstrap (step 1)
+
+Bootstrap_Rademacher <- read.csv("Outputs/bootstrap_wild_v4_Rademacher_gamma01_kappa02_pS09_R025.csv",
+                                 header = TRUE)
+Bootstrap_Mammen2 <- read.csv("Outputs/bootstrap_wild_v4_Mammen2_gamma01_kappa02_pS09_R025.csv",
+                              header = TRUE)
+
+k_a_Rademacher <- Bootstrap_Rademacher[,7:8] %>% drop_na
+k_a_Mammen2 <- Bootstrap_Mammen2[,7:8] %>% drop_na
+```
+\newpage
+
+# Mixed-effects models (*Region* as random effect)
+
+## With the previous best WLS estimates of $k$ and $a$
+
+### Estimations and 95% CIs
+
+```{r}
+best_estim_phase1 <- read.csv("Outputs/Best_estimates_phase1_v4_gamma01_kappa02_pS09_R025.csv",
+                              header = TRUE)
+
+MEM <- Estim_Phase2_SEIR(data = subdata_fm_region,
+                         k_a_df = data.frame("k" = best_estim_phase1$k,
+                                             "a" = best_estim_phase1$a),
+                         Stringency_Index = Stringency_Index$stringency_index,
+                         method = 'lmer')[[1]]
+summary(MEM$model)
+```
+
+```{r}
+best_coord <- MEM$estimates %>%
+  c(residuals(MEM$model)^2 %>% sum) %>%
+  setNames(c("Delta_beta", "Delta_gamma", "Delta_beta_2.5", "Delta_gamma_2.5",
+             "Delta_beta_97.5", "Delta_gamma_97.5", "RSS")) %>% t %>% as.data.frame
+```
+
+### Graphical vizualisations
+
+```{r, fig.width = 6, fig.height = 3.75}
+selection_coef <- function(Delta_beta, Delta_gamma,
+                           kappa = 0.2, beta_w = 0.25, gamma_w = 0.1, SN = 0.75){
+  H <-  sqrt((kappa-gamma_w)^2 + 4*kappa*beta_w*SN)
+  return((kappa*Delta_beta*SN)/H-((kappa-gamma_w)/H + 1)*Delta_gamma/2)
+}
+
+tab <- expand.grid(seq(-0.35,0.35,length.out = 300),
+                   seq(-0.125, 0.125, length.out = 300)) %>%
+  setNames(c("Delta_beta", "Delta_gamma"))
+
+tab$s <- selection_coef(tab$Delta_beta, tab$Delta_gamma)
+
+ggplot(tab, aes(x=Delta_beta, y=Delta_gamma, fill = s)) +
+  geom_vline(xintercept = seq(-0.3,0.3,0.05), lwd = 0.2) +
+  geom_hline(yintercept = seq(-0.1, 0.1, 0.025), lwd = 0.2) +
+  geom_tile(alpha = 0.94) +
+  scale_fill_gradientn(colors = brewer.pal(11, "Spectral") %>% rev,
+                       labels = function(x){add_plus_sign(x, digits = 1)}) +
+  geom_hline(yintercept = 0, col = "grey55", lwd = 0.4) +
+  geom_vline(xintercept = 0, col = "grey55", lwd = 0.4) +
+  geom_segment(aes(x = best_coord$Delta_beta_2.5, xend = best_coord$Delta_beta_97.5,
+                   y = best_coord$Delta_gamma, yend = best_coord$Delta_gamma),
+               col = "black", size = 0.4) +
+  geom_segment(aes(x = best_coord$Delta_beta, xend = best_coord$Delta_beta,
+                   y = best_coord$Delta_gamma_2.5, yend = best_coord$Delta_gamma_97.5),
+               col = "black", size = 0.4) +
+  geom_point(aes(x = best_coord$Delta_beta, y = best_coord$Delta_gamma), col = "black", cex = 1.3) +
+  labs(x = expression(paste("Transmission effect  ", Delta, beta)),
+       y = expression(paste("Recovery effect  ", Delta, gamma)),
+       fill = "Selection coefficient (per day,\n in the absence of NPI)\n") +
+  annotate(geom = "text", label = "Alpha variant", x = 0.75*best_coord$Delta_beta_2.5,
+           y = 0.75*best_coord$Delta_gamma, size = 2.75, hjust = 0) +
+  scale_x_continuous(expand=c(0,0), position = 'top', labels = function(x){add_plus_sign(x)},
+                     limits = c(-0.3,0.3), breaks = seq(-0.3,0.3,0.1)) +
+  scale_y_continuous(expand=c(0,0), limits = c(-0.125, 0.125), breaks = seq(-0.1, 0.1, 0.05),
+                     labels = function(x){add_plus_sign(x)}) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10),
+        axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12),
+        legend.title = element_text(size = 8, hjust = 0))
+
+# ggsave("Delta_gamma_vs_Delta_beta_best_WLS_estimates_SEIR_MEM_v4.png", units="in", width=6, height=3.75, dpi=600)
+```
+
+**Computation of the selective advantage of the Alpha variant (in the absence of NPIs)**
+
+```{r}
+H <- 2*sqrt((kappa-gamma_w)^2+4*kappa*beta_w*SN)
+
+s_day <- (2*kappa*best_coord$Delta_beta*SN - (kappa-gamma_w + H)*best_coord$Delta_gamma)/H
+s_week <- 7*s_day
+
+print(round(s_day, 2)); print(round(s_week, 2))
+```
+
+```{r, fig.height=7, fig.height=5}
+ggplot() +
+  facet_wrap(~ Region, ncol=3) +
+  geom_rect(data = Stringency_Index,
+            aes(xmin = Day, xmax = Day+1, ymin = -Inf, ymax = Inf, fill = stringency_index)) +
+  scale_fill_gradient(low = 'grey95', high = 'grey55') +
+  geom_line(data = MEM$fit, aes(x = Date, y = fitted_values),
+            lwd = 0.5, col = "#ff59f5") +
+  geom_point(data = data_fm_region, aes(x = week+3.5, y = logit_fm), cex = 0.3) +
+  labs(x = "\n(2020-2021)", fill = "Stringency Index",
+       y = "Frequency of the Alpha variant (logit scale)\n") +
+  geom_hline(yintercept = logit(threshold), lwd = 0.4) +
+  scale_x_date(expand = c(0,0), limits = c(min(data_fm_region$week), max(data_fm_region$week))) +
+  scale_y_continuous(expand = c(0,0), limits = c(-5.5,5), breaks = seq(-4,4,2)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10),
+        axis.title.x = element_text(size=10),
+        legend.position = 'top', legend.title = element_text(size = 9),
+        legend.key.size = unit(0.5, 'cm'))
+```
+
+```{r}
+mem.Delta_beta <- lme4::lmer(logit_fm ~ Delta_beta + (1|Region), REML = FALSE, data=MEM$data_model)
+mem.Delta_gamma <- lme4::lmer(logit_fm ~ Delta_gamma + (1|Region), REML = FALSE, data=MEM$data_model)
+mem.2 <- lme4::lmer(logit_fm ~ Delta_beta + Delta_gamma + (1|Region), REML = FALSE, data=MEM$data_model)
+
+test1 <- anova(mem.Delta_beta, mem.2)
+test2 <- anova(mem.Delta_gamma, mem.2)
+
+pvalues <- c(0.001, 0.01, 0.05, 1)
+labels <- c("p < 0.001 (***)", "0.001 < p < 0.01 (**)", "0.01 < p < 0.05 (*)", "p > 0.05 ( )")
+
+tests <- data.frame(c(test1$`Pr(>Chisq)`[2], test2$`Pr(>Chisq)`[2]) %>% round(3),
+                    c(labels[which(test1$`Pr(>Chisq)`[2] - pvalues < 0)[1]],
+                      labels[which(test2$`Pr(>Chisq)`[2] - pvalues < 0)[1]]))
+                            
+colnames(tests) <- c("(1 | Region)+$\\Delta\\beta+\\Delta\\gamma$", "Signif.")
+rownames(tests) <- c("(1 | Region)+$\\Delta\\beta$", "(1 | Region)+$\\Delta\\gamma$")
+
+kable(tests)
+```
+
+## With small variations in the fixed parameters
+
+```{r}
+# default: - kappa   = 0.2  
+#          - beta_w  = 0.25
+#          - gamma_w = 0.1
+#          - SN      = 0.75
+
+# small variations +/- 10-20 %
+
+var <- c(0.8, 0.9, 1, 1.1, 1.2)
+
+kappa.var <- 0.2*var
+beta_w.var <- 0.25*var
+gamma_w.var <- 0.1*var
+SN.var <- 0.75*var
+
+# Variation in kappa
+
+MEM_coord.kappa <- kappa.var %>% lapply(function(k){
+  return(Estim_Phase2_SEIR(data = subdata_fm_region, kappa = k,
+                           k_a_df = data.frame("k" = best_estim_phase1$k,
+                                               "a" = best_estim_phase1$a),
+                           Stringency_Index = Stringency_Index$stringency_index,
+                           method = 'lmer')[[1]]$estimates %>% c(k) %>%
+           setNames(c("Delta_beta", "Delta_gamma", "Delta_beta_2.5", "Delta_gamma_2.5",
+                      "Delta_beta_97.5", "Delta_gamma_97.5", "kappa")))
+  }) %>% bind_rows %>% as.data.frame
+
+# Variation in beta_w
+
+MEM_coord.beta_w <- beta_w.var %>% lapply(function(b){
+  return(Estim_Phase2_SEIR(data = subdata_fm_region, beta_w = b,
+                           k_a_df = data.frame("k" = best_estim_phase1$k,
+                                               "a" = best_estim_phase1$a),
+                           Stringency_Index = Stringency_Index$stringency_index,
+                           method = 'lmer')[[1]]$estimates %>% c(b) %>%
+           setNames(c("Delta_beta", "Delta_gamma", "Delta_beta_2.5", "Delta_gamma_2.5",
+                      "Delta_beta_97.5", "Delta_gamma_97.5", "beta_w")))
+  }) %>% bind_rows %>% as.data.frame
+
+# Variation in gamma_w
+
+MEM_coord.gamma_w <- gamma_w.var %>% lapply(function(g){
+  return(Estim_Phase2_SEIR(data = subdata_fm_region, gamma_w = g,
+                           k_a_df = data.frame("k" = best_estim_phase1$k,
+                                               "a" = best_estim_phase1$a),
+                           Stringency_Index = Stringency_Index$stringency_index,
+                           method = 'lmer')[[1]]$estimates %>% c(g) %>%
+           setNames(c("Delta_beta", "Delta_gamma", "Delta_beta_2.5", "Delta_gamma_2.5",
+                      "Delta_beta_97.5", "Delta_gamma_97.5", "gamma_w")))
+  }) %>% bind_rows %>% as.data.frame
+
+# Variation in S/N
+
+MEM_coord.SN <- SN.var %>% lapply(function(pS){
+  return(Estim_Phase2_SEIR(data = subdata_fm_region, SN = pS,
+                           k_a_df = data.frame("k" = best_estim_phase1$k,
+                                               "a" = best_estim_phase1$a),
+                           Stringency_Index = Stringency_Index$stringency_index,
+                           method = 'lmer')[[1]]$estimates %>% c(pS) %>%
+           setNames(c("Delta_beta", "Delta_gamma", "Delta_beta_2.5", "Delta_gamma_2.5",
+                      "Delta_beta_97.5", "Delta_gamma_97.5", "SN")))
+  }) %>% bind_rows %>% as.data.frame
+```
+
+```{r, fig.width = 9, fig.height = 6}
+# export pdf : landscape (6 x 9)
+
+plot_grid(
+  plot_coord.var(MEM_coord.beta_w, ref = beta_w, legend = expression(beta[w]~'='~gamma[w]~R[0][w]),
+                 colors = colorRampPalette(c("#FF8E6A", "#AB310A"))(5)),
+  plot_coord.var(MEM_coord.kappa, ref = kappa, legend = expression(kappa),
+                 colors = colorRampPalette(c("#E398E4", "#780979"))(5)),
+  plot_coord.var(MEM_coord.gamma_w, ref = gamma_w, legend = expression(gamma[w]),
+                 colors = colorRampPalette(c("#B2E691", "#146B0F"))(5)),
+  plot_coord.var(MEM_coord.SN, ref = SN, legend = "S/N",
+                 colors = colorRampPalette(c("#87A8ED", "#073390"))(5)),
+  align = 'v', ncol = 2, labels = paste0(LETTERS[1:4], ")"))
+```
+
+## With small variations in the fixed parameters propagated from the first step
+
+```{r}
+optim_var_step1 <- read.csv("Outputs/Estimates_with_pertubed_parameters_phase1.csv", header = TRUE)
+
+optim_var_step1.k <- optim_var_step1 %>% subset(estim_parm == "k")
+optim_var_step1.a <- optim_var_step1 %>% subset(estim_parm == "a")
+
+optim_var <- optim_var_step1.a
+optim_var <- optim_var[-which(colnames(optim_var)=="estim_parm")]
+colnames(optim_var)[colnames(optim_var)=="estimates"] <- "a"
+
+optim_var$k <- optim_var_step1.k$estimates[match(paste(optim_var$fixed_parm,
+                                                       optim_var$fixed_parm_value),
+                                                 paste(optim_var_step1.k$fixed_parm,
+                                                       optim_var_step1.k$fixed_parm_value))]
+optim_var <- optim_var %>% apply(1, function(x){
+  res <- c("R0" = beta_w/gamma_w, "kappa" = kappa, "gamma" = gamma_w)
+  res[which(names(res) == x[["fixed_parm"]])] <- as.numeric(x[["fixed_parm_value"]])
+  res[1] <- (res[1]*gamma_w)
+  names(res) <- c("beta_w", "kappa", "gamma_w")
+  return(res)
+  }) %>% t %>% cbind(optim_var,.)
+
+optim_var <- 1:nrow(optim_var) %>% lapply(function(i){
+  return(Estim_Phase2_SEIR(data = subdata_fm_region,
+                           k_a_df = data.frame("k" = optim_var$k[i],
+                                               "a" = optim_var$a[i]),
+                           kappa = optim_var$kappa[i],
+                           beta_w = optim_var$beta_w[i],
+                           gamma_w = optim_var$gamma_w[i],
+                           SN = optim_var$SNf[i] %>% plyr::round_any(0.05, floor),
+                           Stringency_Index = Stringency_Index$stringency_index,
+                           method = 'lmer')[[1]]$estimates %>% c %>%
+           setNames(c("Delta_beta", "Delta_gamma", "Delta_beta_2.5", "Delta_gamma_2.5",
+                      "Delta_beta_97.5", "Delta_gamma_97.5")))
+  }) %>% bind_rows %>% cbind(optim_var,.)
+```
+
+```{r, fig.width = 9, fig.height = 14}
+# Figure STEP 1
+
+Fig_var.1 <- readRDS("Outputs/Fig_optim_var_step1.rds")
+
+Fig_var_R0.1 <- Fig_var.1$R0
+Fig_var_kappa.1 <- Fig_var.1$kappa
+Fig_var_gamma.1 <- Fig_var.1$gamma
+Fig_var_SN0.1 <- Fig_var.1$SN0
+
+# Figure STEP 2
+
+optim_var$fixed_parm[optim_var$fixed_parm == "R0"] <- "beta_w"
+optim_var$fixed_parm_value[optim_var$fixed_parm == "beta_w"] <- optim_var$fixed_parm_value[optim_var$fixed_parm == "beta_w"]*gamma_w
+
+Fig_var_R0.2 <- plot_coord.var(optim_var[optim_var$fixed_parm=="beta_w", c(3,12:17)], ref = beta_w,
+                               legend = expression(beta[w]~'='~gamma[w]~R[0][w]), point_size = 2,
+                               colors = colorRampPalette(c("#FF8E6A", "#AB310A"))(5))
+
+Fig_var_kappa.2 <- plot_coord.var(optim_var[optim_var$fixed_parm=="kappa", c(3,12:17)], ref = kappa,
+                                  legend = expression(kappa),
+                                  colors = colorRampPalette(c("#E398E4", "#780979"))(5), point_size = 2)
+
+Fig_var_gamma.2 <- plot_coord.var(optim_var[optim_var$fixed_parm=="gamma", c(3,12:17)], ref = gamma_w,
+                                  legend = expression(gamma[w]), point_size = 2,
+                                  colors = colorRampPalette(c("#B2E691", "#146B0F"))(5))
+  
+Fig_var_SN0.2 <- plot_coord.var(optim_var[optim_var$fixed_parm=="SN0", c(3,12:17)], ref = 0.9,
+                                legend = expression(S(t[0]^step1)/N), point_size = 2,
+                                colors = colorRampPalette(c("#AED4E7", "#0A6295"))(5))
+
+# Merge
+
+arrow <- ggdraw() + draw_image(magick::image_read_pdf("C:/Users/wbenhamou/Desktop/ALPHA/MS/FIGURES/arrow.pdf"))
+
+labels_fig_var <- rep(NA, 15) 
+labels_fig_var[c(4,6,7,9,10,12,13,15)] <- paste0("1.", LETTERS[1:4], ")") %>%
+  rbind(paste0("2.", LETTERS[1:4], ")")) %>% c
+
+plot_grid(
+  ggplot() + theme(panel.border = element_rect(colour = "black", fill=NA, size=1.5)) +
+    draw_label("S T E P   1", fontface = 'bold'),
+  ggplot() + theme_void(),
+  ggplot() + theme(panel.border = element_rect(colour = "black", fill=NA, size=1.5)) +
+    draw_label("S T E P   2", fontface = 'bold'),
+  
+  plot_grid(Fig_var_R0.1 + theme(axis.title.x = element_blank()),
+            Fig_var_kappa.1 + theme(axis.title.x = element_blank()),
+            Fig_var_gamma.1 + theme(axis.title.x = element_blank()),
+            Fig_var_SN0.1,
+            ncol = 1, align = 'v', labels = paste0("1.", LETTERS[1:4], ")"), label_x = -0.025),
+  plot_grid(arrow, arrow, arrow, arrow, ncol = 1),
+  plot_grid(Fig_var_R0.2 + theme(legend.position = 'none'),
+            Fig_var_kappa.2 + theme(legend.position = 'none'),
+            Fig_var_gamma.2 + theme(legend.position = 'none'),
+            Fig_var_SN0.2 + theme(legend.position = 'none'),
+            ncol = 1, align = 'v', labels = paste0("2.", LETTERS[1:4], ")")),
+  
+  ncol = 3, align = 'hv', rel_widths = c(0.5,0.1, 0.4), rel_heights = c(0.04, 0.96)
+)
+
+# export pdf : portrait (13 x 10)
+```
+
+## With 1999 estimates from Wild Bootstrap
+
+### Using Mammen's 2 points distribution
+
+**Estimations and 95% CIs**
+
+```{r, eval = FALSE}
+MEM_Mammen2 <- Estim_Phase2_SEIR(data = subdata_fm_region, k_a_df = k_a_Mammen2,
+                                 Stringency_Index = Stringency_Index$stringency_index,
+                                 method = 'lmer')
+
+# saveRDS(MEM_Mammen2, "Outputs/SEIR_MEM_Mammen2_v4.rds")
+```
+
+**Graphical vizualisations**
+
+```{r}
+MEM_Mammen2 <- readRDS("Outputs/SEIR_MEM_Mammen2_v4.rds")
+
+coord_Mammen2 <- MEM_Mammen2 %>% lapply(FUN = function(elmt){
+  return(elmt$estimates %>% c(residuals(elmt$model)^2 %>% sum) %>%
+           setNames(c("Delta_beta", "Delta_gamma", "Delta_beta_2.5", "Delta_gamma_2.5",
+                      "Delta_beta_97.5", "Delta_gamma_97.5", "RSS")))
+  }) %>% bind_rows %>% as.data.frame %>% drop_na
+
+coord_Mammen2 <- coord_Mammen2[order(coord_Mammen2$RSS, decreasing = TRUE),]
+
+plot_coord(coord_Mammen2, density = TRUE) # pdf portrait 6 x 4.5
+```
+
+```{r, fig.height = 4, fig.width = 9}
+Fig_density_Delta_beta_Mammen2 <- plot_density(expression(paste(Delta, beta)),
+                                               coord_Mammen2$Delta_beta, alpha = 0.05,
+                                               col = "#159301")
+Fig_density_Delta_gamma_Mammen2 <- plot_density(expression(paste(Delta, gamma)),
+                                                coord_Mammen2$Delta_gamma, alpha = 0.05,
+                                                col = "#159301")
+
+plot_grid(Fig_density_Delta_beta_Mammen2 +
+            geom_vline(xintercept=best_coord$Delta_beta, lwd=0.7, lty='dashed') +
+            theme(axis.text.x = element_text(angle = 15, hjust = 1)),
+          Fig_density_Delta_gamma_Mammen2 +
+            geom_vline(xintercept=best_coord$Delta_gamma, lwd=0.7, lty='dashed') +
+            theme(axis.text.x = element_text(angle = 15, hjust = 1)),
+          labels = paste0(LETTERS[1:2], ")")) # PDF: 9 x 4
+```
+
+**Computation of the selective advantage of the Alpha variant (in the absence of NPIs)**
+
+```{r}
+summary(coord_Mammen2$Delta_beta)
+quantile(coord_Mammen2$Delta_beta, c(0.025,0.975))
+
+summary(coord_Mammen2$Delta_gamma)
+quantile(coord_Mammen2$Delta_gamma, c(0.025,0.975))
+
+kappa = 0.2
+beta_w = 0.25
+gamma_w = 0.1
+SN = 0.75
+
+H <- 2*sqrt((kappa-gamma_w)^2+4*kappa*beta_w*SN)
+
+s_day <- (2*kappa*coord_Mammen2$Delta_beta*SN - (kappa-gamma_w + H)*coord_Mammen2$Delta_gamma)/H
+summary(s_day)
+sd(s_day)
+
+s_week <- 7*s_day
+summary(s_week)
+sd(s_week)
+```
+
+### Using Rademacher distribution
+
+**Estimations and 95% CIs**
+
+```{r, eval = FALSE}
+MEM_Rademacher <- Estim_Phase2_SEIR(data = subdata_fm_region, k_a_df = k_a_Rademacher[-1549,],
+                                    Stringency_Index = Stringency_Index$stringency_index,
+                                    method = 'lmer')
+
+# row 1549: fixed-effect model matrix is rank deficient so dropping 1 column / coefficient
+
+saveRDS(MEM_Rademacher, "Outputs/SEIR_MEM_Rademacher_v4.rds")
+```
+
+```{r}
+MEM_Rademacher <- readRDS("Outputs/SEIR_MEM_Rademacher_v4.rds")
+
+coord_Rademacher <- MEM_Rademacher %>% lapply(FUN = function(elmt){
+  return(elmt$estimates %>% c(residuals(elmt$model)^2 %>% sum) %>%
+           setNames(c("Delta_beta", "Delta_gamma", "Delta_beta_2.5", "Delta_gamma_2.5",
+                      "Delta_beta_97.5", "Delta_gamma_97.5", "RSS")))
+  }) %>% bind_rows %>% as.data.frame %>% drop_na
+
+coord_Rademacher <- coord_Rademacher[order(coord_Rademacher$RSS, decreasing = TRUE),]
+coord_Rademacher <- coord_Rademacher[-1,] #Bad estimates
+
+plot_coord(coord_Rademacher, density = TRUE)
+```
+
+```{r, fig.height = 4, fig.width = 9}
+Fig_density_Delta_beta_Rademacher <- plot_density(expression(paste(Delta, beta)),
+                                                  coord_Rademacher$Delta_beta, alpha = 0.05,
+                                                  col = "#ff9700")
+Fig_density_Delta_gamma_Rademacher <- plot_density(expression(paste(Delta, gamma)),
+                                                   coord_Rademacher$Delta_gamma, alpha = 0.05,
+                                                   col = "#ff9700")
+
+plot_grid(Fig_density_Delta_beta_Rademacher +
+            geom_vline(xintercept=best_coord$Delta_beta, lwd=0.7, lty='dashed') +
+            theme(axis.text.x = element_text(angle = 15, hjust = 1)),
+          Fig_density_Delta_gamma_Rademacher +
+            geom_vline(xintercept=best_coord$Delta_gamma, lwd=0.7, lty='dashed') +
+            theme(axis.text.x = element_text(angle = 15, hjust = 1)),
+          labels = paste0(LETTERS[1:2], ")")) # PDF: 9 x 4
+```
+
+**Computation of the selective advantage of the Alpha variant (in the absence of NPIs)**
+
+```{r}
+summary(coord_Rademacher$Delta_beta)
+quantile(coord_Rademacher$Delta_beta, c(0.025,0.975))
+
+summary(coord_Rademacher$Delta_gamma)
+quantile(coord_Rademacher$Delta_gamma, c(0.025,0.975))
+
+kappa = 0.2
+beta_w = 0.25
+gamma_w = 0.1
+SN = 0.75
+
+H <- 2*sqrt((kappa-gamma_w)^2+4*kappa*beta_w*SN)
+
+s_day <- (2*kappa*coord_Rademacher$Delta_beta*SN - (kappa-gamma_w + H)*coord_Rademacher$Delta_gamma)/H
+s_week <- 7*s_day
+summary(s_week)
+sd(s_week)
+```
+
+### Summary: 95% distributions
+
+```{r, fig.width=9, fig.height=6}
+plot_grid(ggdraw() + draw_label("With pairs {k;a} from Wild Bootstraps
+using Mammen's 2-points distribution",
+                                fontface = 'bold', x = 0.2, hjust = 0, size = 10),
+          ggdraw() + draw_label("With pairs {k;a} from Wild Bootstraps
+using Rademacher distribution",
+                        fontface = 'bold', x = 0.2, hjust = 0, size = 10),
+  Fig_density_Delta_beta_Mammen2 +
+    geom_vline(xintercept=best_coord$Delta_beta, lwd=0.7, lty='dashed'),
+  Fig_density_Delta_beta_Rademacher +
+    geom_vline(xintercept=best_coord$Delta_beta, lwd=0.7, lty='dashed'),
+  Fig_density_Delta_gamma_Mammen2 +
+    geom_vline(xintercept=best_coord$Delta_gamma, lwd=0.7, lty='dashed'),
+  Fig_density_Delta_gamma_Rademacher +
+    geom_vline(xintercept=best_coord$Delta_gamma, lwd=0.7, lty='dashed'),
+  ncol = 2, labels = c("","","A)","B)","C)","D)"),
+  rel_heights = c(0.2,1,1))
+```

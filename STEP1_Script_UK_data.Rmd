@@ -1,0 +1,955 @@
+---
+title: "**------ STEP 1 ------**"
+subtitle: "**Phenotypic evolution of SARS-CoV-2: a statistical inference approach**"
+author:  | 
+  | Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon
+  |
+  | *CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France*
+  |
+date: "November 2021"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+    number_sections: yes
+    highlight: tango
+header-includes: 
+  - \renewcommand{\contentsname}{Table of contents}
+  - \usepackage{mathtools}
+encoding: UTF-8
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      fig.align = "center",
+                      message = FALSE,
+                      warning = FALSE,
+                      results='hide')
+
+```
+\newpage
+
+The first step aims to estimate the force of infection in the presence of Non-Pharmaceutical Interventions (NPIs). In particular, we quantify $c(t)$, a function measuring the impact of NPIs at time $t$ on the force of infection $\lambda(t)$. This first step takes place temporally just before the emergence of the Alpha variant (lineage B.1.1.7) - \textit{i.e.} before it reaches 5 \% of the cases tested positive in England (national level) - and consists in modeling the epidemiological phase of the previous lineage, which we refer to as the Wild Type (WT) strain, disregarding the pre-existing genetic diversity. Particularly, our goal was to link the Stringency Index with the effectiveness of NPIs, \textit{i.e.} control of viral transmission. For this purpose, we developed a revised version of the $SEIR$ model formalised by a set of Ordinary Differential Equations (ODEs). Observations are daily new cases (i) tested negative and (ii) tested positive, and (iii) daily new fatality cases. We modeled the link between the effectiveness of the control measures $c(t)$ and the Stringency Index $\psi(t)$ for each time point $t$ through a concav or convex relationship such that:
+\[c(t) = k \Bigg(\frac{\psi(t)}{100}\Bigg)^a \label{control}\]
+with $k$, the maximum achievable effectiveness, and $a$, a '\textit{shape}' parameter; $\psi(t)$ takes values between 0 (no control) and 100.
+
+# Initialisation
+
+```{r}
+# Cleaning objects from the workplace
+rm(list=ls())
+
+Sys.setlocale("LC_TIME", "English")
+
+# Packages (may first require installations: install.packages())
+library(tidyverse)
+library(plyr)
+library(ggplot2)
+library(gridExtra)
+library(cowplot)
+library(deSolve)
+library(boot)
+library(scales)
+library(knitr)
+library(crayon)
+library(lubridate)
+library(readODS)
+library(ggpubr)
+library(corrplot)
+library(extrafont)
+
+# Execute functions from external R script
+source("STEP1_functions.R")
+```
+\newpage
+
+# $\boldsymbol{SEIR}$ model
+
+\begin{align*}
+    \begin{dcases}
+        \dot{S}(t) &= -(1-c(t))\beta S(t)\frac{I(t)}{N}\\
+        \dot{E}(t) &= (1-c(t))\beta S(t)\frac{I(t)}{N} - \kappa E(t)\\
+        \dot{I}_A(t) &= (1-\omega) \kappa E(t) - \gamma I_A(t)\\
+        \dot{I}_{Sr}(t) &= (1-p)\omega\kappa E(t) - \gamma I_{Sr}(t)\\
+        \dot{I}_{Sd}(t) &= p \omega\kappa E(t) - \alpha I_{Sd}(t)\\
+        \dot{R}(t) &= \gamma \Big(I_A(t)+I_{Sr}(t)\Big)\\
+        \dot{D}(t) &= \alpha I_{Sd}(t)
+    \end{dcases} \label{model_SEIR_phase1}
+\end{align*}
+
+\noindent The basic reproduction number is then given by:
+$$\mathcal{R}_0 = \beta \Bigg(\frac{1 - \omega p}{\gamma} + \frac{\omega p}{\alpha} \Bigg) \approx \frac{\beta}{\gamma}$$
+
+```{r}
+N <- 67886011 # Size of the UK population by mid-2020
+pS <- 0.9 # proportion of susceptible hosts in the population: S(t0)/N
+kappa <- 0.2 # mean duration of incubation/latency period: around 5 days
+gamma <- 0.1 # mean duration of infectious period: around 10 days
+R0 = 2.5 # Basic reproduction number of the WT strain
+```
+
+# UK data
+
+## Sources
+
+- Daily new positive and negative tests: \textbf{\textit{Our World in Data}}
+
+[https://ourworldindata.org/grapher/daily-tests-and-daily-new-confirmed-covid-cases?country=~GBR](https://ourworldindata.org/grapher/daily-tests-and-daily-new-confirmed-covid-cases?country=~GBR)
+
+(with data from 07/04/2020 to 28/04/2021)
+
+- Daily new fatality cases: \textbf{GOV.UK} - *Daily deaths with COVID-19 on the death certificate by date of death*
+
+[https://coronavirus.data.gov.uk/details/deaths](https://coronavirus.data.gov.uk/details/deaths)
+
+(with data from 02/02/2020 to 23/04/2021)
+
+- Genotypic frequencies: \textbf{Public Health England Technical Briefing 5}
+
+[https://www.gov.uk/government/publications/investigation-of-novel-sars-cov-2-variant-variant-of-concern-20201201](https://www.gov.uk/government/publications/investigation-of-novel-sars-cov-2-variant-variant-of-concern-20201201)
+
+[https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/957631/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/957631/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods)
+
+\small \textbf{NB:} For this phase (that is, phase 1: before the emergence of the Alpha variant), genotypic frequencies are only used to set the date for which phase 1 ends. Here, we decided that phase 1 ended when the variant reaches 5% of daily new cases tested positive. \normalsize
+
+## Data import
+
+```{r}
+# csv files
+
+Tests <- read.csv("Data/daily-tests-and-daily-new-confirmed-covid-cases.csv", header = TRUE)
+Deaths <- read.csv("Data/data_daily_deaths_UK_2021_May_05.csv", header = TRUE, dec = ",")
+stringency_index <- read.csv("Data/covid-stringency-index.csv", header = TRUE)
+data_VOC.202012.01 <- read_ods("Data/Variant_of_Concern_VOC_202012_01_Technical_Briefing_5_Data_England.ods",
+                               sheet = 5, col_names = TRUE)
+```
+
+## Data processing
+
+```{r}
+data_tests <- Tests[which(Tests$Entity == "United Kingdom"), c(3,4,6)]
+colnames(data_tests) <- c("date", "new_tests", "new_cases")
+data_tests$negative_tests <- data_tests$new_tests - data_tests$new_cases
+
+data_deaths <- Deaths[which(Deaths$areaName == "United Kingdom"), c(4,5)]
+colnames(data_deaths) <- c("date", "new_deaths")
+
+stringency_index <- stringency_index[which(stringency_index$Entity == "United Kingdom"), c(3,4)]
+colnames(stringency_index) <- c("date", "stringency_index")
+```
+
+```{r}
+data_tests$date <- ymd(data_tests$date)
+data_deaths$date <- ymd(data_deaths$date)
+stringency_index$date <- ymd(stringency_index$date)
+data_VOC.202012.01$week <- dmy(data_VOC.202012.01$week)
+```
+
+```{r}
+threshold <- 5 # %, threshold of frequency of the variant among confirmed cases
+#                                                         below which genetic diversity is neglected
+Tf <- data_VOC.202012.01$week[which(data_VOC.202012.01$`percent_Confirmed SGTF` > threshold)][1] - 1
+T1 <- ymd("2020-08-03")
+T0 <- T1-1
+
+dates <- seq(T0, Tf, by = '1 day')
+
+data_tests <- data_tests[match(dates[-1], data_tests$date),]
+
+D1 <- data_deaths$new_deaths[match(dates[2]+(-3:3), data_deaths$date)] %>% mean
+# 7-day average for the number of deaths at t =1
+data_deaths <- data_deaths[match(dates[-1], data_deaths$date),]
+
+stringency_index <- stringency_index[match(dates, stringency_index$date),]
+
+y <- cbind("negative_tests" = data_tests$negative_tests,
+           "positive_tests" = data_tests$new_cases,
+           "deaths" = data_deaths$new_deaths)
+
+StrInd <- stringency_index$stringency_index
+```
+\newpage
+
+## Graphical vizualisations
+
+```{r, fig.height=7, fig.width=9}
+theme_data <- theme_bw() + theme(axis.text.x = element_text(size=10),
+                                 axis.text.y = element_text(size=11, angle = 45),
+                                 axis.title.x = element_blank())
+
+Fig_neg_tests <- ggplot(data.frame("Date" = dates[-1], y), aes(x = Date, y = negative_tests)) +
+  geom_col(fill = "#00BFC4") +
+  ylab("Daily number of negative tests (7-week average)") +
+  scale_x_date(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+
+Fig_pos_tests <- ggplot(data.frame("Date" = dates[-1], y), aes(x = Date, y = positive_tests)) +
+  geom_col(fill = "#F8766D") +
+  ylab("Daily number of positive tests (7-week average)") +
+  scale_x_date(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+  
+
+Fig_deaths <- ggplot(data.frame("Date" = dates[-1], y), aes(x = Date, y = deaths)) +
+  geom_col(fill = "darkgray") +
+  ylab("Daily fatality cases with Covid-19 on the death certificate \n by date of death") +
+  scale_x_date(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0), labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+
+Fig_stringency_index <- ggplot(data.frame("Date" = dates, "Stringency_Index" = StrInd),
+                               aes(x = Date, y = Stringency_Index)) +
+  geom_step(cex = 1.2, col = "darkred") +
+  labs(x = "UK (2020-2021)", y = "Stringency Index \n") +
+  ylim(c(40,90)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=11), axis.text.y = element_text(size=11))
+  
+grid.arrange(plot_grid(Fig_neg_tests, Fig_pos_tests, Fig_deaths, ncol = 3, nrow = 1),
+             Fig_stringency_index, ncol = 1, nrow = 2, heights = c(0.6,0.4),
+             bottom = "Time series dealing with daily new cases tested negative (top left), daily new cases tested positive (top middle),
+daily new fatality cases (top right), and Stringency Index in the UK (bottom).")
+```
+
+# Statistical inference based on Weighted Least Squares
+
+Estimating parameters for the first phase was performed using the method of Weigthed Least Squares (WLS). Let $\theta = \begin{pmatrix} k, a, E(t_{0,~\text{step 1}}), \alpha, \omega, p, \eta, \mu \end{pmatrix}^\top$ be the vector of parameters and $\widehat{\theta}$ its estimator. Observation states - here, (1) daily new cases tested negative, (2) daily new cases tested positive and (3) daily new fatality cases - are specified with the subscript $i$ and are modelled by functions $f_i$. Time points are noted $t$ and $y_i$ refers to the response variables. Hence:
+\[\widehat{\theta} = \underset{\theta}{\text{argmin}} \sum_i \sum_t \frac{(y_{i,t} - f_i(\theta, t))^2}{f_i(\theta, t)}.\]
+
+## Initial values for parameters to estimate
+
+```{r}
+# For instance:
+seed <- 1234
+set.seed(seed)
+
+n_starts = 1500 # n optimization starting with a different set of initial values of parameters
+
+transf_parm_optim <- c(runif(n_starts, 0, 0.01) %>% log_ab(a=0,b=0.01), # initial values for E(t0)/N
+                       runif(n_starts, 0, 1) %>% logit, # initial values for alpha
+                       runif(n_starts, 0, 1) %>% logit, # initial values for k
+                       runif(n_starts, 0, 10) %>% log, # initial values for a
+                       runif(n_starts, 0.2, 0.8) %>% logit, # initial values for omega
+                       runif(n_starts, 0, 0.1) %>% log_ab(a=0,b=0.2), # initial values for p
+                       runif(n_starts, 0, 1e-4) %>% logit, # initial values for eta
+                       runif(n_starts, 0, 0.01) %>% logit) %>% # initial values for mu
+  matrix(ncol = 8, byrow = FALSE)
+
+colnames(transf_parm_optim) <- c("pE", "alpha", "k", "a", "omega", "p", "eta", "mu")
+```
+
+## Estimations from UK data
+
+With knowledge of the basic reproduction number $\mathcal{R}_0 = 2.5$.
+
+```{r, results = 'show', eval = FALSE}
+estimation <- Estimate_parallel(transf_parm_optim = transf_parm_optim,
+                                constants = c("R0" = R0, "pS" = pS, "gamma" = gamma, "kappa" = kappa),
+                                approx_init_I = TRUE, deaths_approx_init_IS = D1,
+                                stringency_index = StrInd, times = 0:(Tf-T0), N = N, data_obs = y)
+estimation$Fig
+
+estim_tab <- estimation$Results
+estim_tab$R0 <- R0*gamma*(estim_tab$alpha+estim_tab$omega*estim_tab$p*(gamma-estim_tab$alpha))/
+  (gamma*estim_tab$alpha)
+estim_tab$group <- paste0("seed",seed,"_n",n_starts)
+
+# write.csv(estim_tab, file = paste0("Outputs/Estim_tab_v4_gamma01_kappa02_pS09_R025_",
+#                                    paste0("n",n_starts,"_seed",seed, ".csv")), row.names = F)
+```
+
+### Results
+
+```{r, results = 'show', fig.width=9}
+# Estim_tab_v4_gamma01_kappa02_R025.csv -> file containing estimates for 1500 sets of initial values
+estim_tab <- read.csv(file = "Outputs/Estim_tab_v4_gamma01_kappa02_pS09_R025.csv",
+                      header = TRUE)
+estim_tab$Repeat <- 1:dim(estim_tab)[1]
+initial_values <- read.csv(file = "Outputs/Initial_values_v4_gamma01_kappa02_pS09.csv",
+                           header = TRUE)
+
+ggplot(data = estim_tab, aes(x = Repeat, y = Value)) +
+  geom_line(cex = 0.1) +
+  geom_point(aes(col = Convergence), size = 1.1, pch = 19) +
+  theme_bw() +
+  xlab("Optim() repeat") +
+  ylab("Minimum WLS value") +
+  ggtitle("Results (value and convergence features) returned by function optim()") +
+  scale_color_manual(values = c("#C77CFF", "#F8766D", "#00BFC4")) +
+  theme(axis.text.x = element_text(size=11), axis.text.y = element_text(size=11),
+        legend.position = "bottom") +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))
+
+# Only results with successful convergence are considered
+estim_tab <- estim_tab[estim_tab$Convergence == "Successful completion" & !is.na(estim_tab$Value),]
+estim_tab <- data.frame(estim_tab[,1:4], "beta" = R0*gamma, estim_tab[5:13])
+# estimates from best fit
+index <- which(estim_tab$Value == min(estim_tab$Value))
+# Value = 55012.49
+estim <- estim_tab[index,-c(1:3,14)]
+
+rbind("Estimates" = estim) %>%
+  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>%
+  dplyr::rename("E(t0)/N" = "pE") %>% kable(.)
+```
+
+### Comparison of fitted values with observed data
+
+```{r, fig.width=7, fig.height=7}
+compare <- simul_and_compare(estimates = estim[-c(2,10)],
+                              constants = c("R0" = R0, "pS" = pS, "gamma" = gamma, "kappa" = kappa),
+                              dates = dates, N = N, data_obs = y, stringency_index = StrInd,
+                              approx_init_I = TRUE)
+
+theme_residuals <- theme(axis.title.x = element_blank(), axis.title.y = element_text(size = 8),
+                         axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8))
+
+plot_grid(compare$Fig_negative_tests + theme(axis.title.x = element_blank()) +
+               draw_plot(compare$Fig_resid_negative_tests + theme_residuals,
+                         x = Tf-44, y = 140000, width = 49, height = 90000),
+             compare$Fig_positive_tests + theme(axis.title.x = element_blank()) +
+               draw_plot(compare$Fig_resid_positive_tests + theme_residuals,
+                         x = T0, y = 8000, width = 50, height = 20500),
+             compare$Fig_deaths + theme(axis.title.x = element_blank()) +
+               draw_plot(compare$Fig_resid_deaths + theme_residuals,
+                         x = T0, y = 125, width = 50, height = 300),
+             ncol = 1, nrow = 3)
+```
+\newpage
+
+```{r, echo=FALSE, results='show'}
+paste0("Final time point (t = ", Tf, "):") %>% print
+
+(compare$simul[dim(compare$simul)[1],2:8]/N) %>%
+  setNames(c("S(t)/N", "E(t)/N", "I_A(t)/N", "I_Sr(t)/N", "I_Sd(t)/N",
+             "R(t)/N", "D(t)/N")) %>% t %>% kable
+```
+
+# Parameter distributions based on Wild Bootstrap
+
+```{r}
+transf_parm_optim <- rbind(c("pE" = log_ab(estim$pE, a=0,b=0.01),
+                              "alpha" = logit(estim$alpha),
+                              "k" = logit(estim$k),
+                              "a" = log(estim$a),
+                              "omega" = logit(estim$omega),
+                              "p" = log_ab(estim$p,a=0,b=0.2),
+                              "eta" = logit(estim$eta),
+                              "mu" = logit(estim$mu)),
+                            initial_values[index,-which(colnames(initial_values) == "beta")])
+```
+
+## With Mammen's 2-points distribution
+
+```{r, eval = FALSE}
+bootstrap_Mammen2 <- Bootstrap.wild(data_obs = y, simul_obs = compare$data_estim, nb = 1000,
+                                    transf_parm_optim = transf_parm_optim,
+                                    constants = c("R0" = R0, "pS" = pS,
+                                                  "gamma" = gamma, "kappa" = kappa),
+                                    times = 0:(Tf-T0), N = N, approx_init_I = TRUE,
+                                    stringency_index = StrInd,
+                                    random.distrib = "Mammen2", seed = 456)
+
+# write.csv(bootstrap_Mammen2,
+#           file = "Outputs/bootstrap_wild_v4_Mammen2_gamma01_kappa02_pS09_R025_nb1000_seed456.csv",
+#           row.names = FALSE)
+```
+
+## With Rademacher distribution
+
+```{r, eval = FALSE}
+bootstrap_Rademacher <- Bootstrap.wild(data_obs = y, simul_obs = compare$data_estim, nb = 1000,
+                                       transf_parm_optim = transf_parm_optim,
+                                       constants = c("R0" = R0, "pS" = pS,
+                                                     "gamma" = gamma, "kappa" = kappa),
+                                       times = 0:(Tf-T0), N = N, approx_init_I = TRUE,
+                                       stringency_index = StrInd,
+                                       random.distrib = "Rademacher", seed = 456)
+
+# write.csv(bootstrap_Rademacher,
+#           file = "Outputs/bootstrap_wild_v4_Rademacher_gamma01_kappa02_pS09_R025_nb1000_seed456.csv",
+#           row.names = FALSE)
+```
+
+## Results
+
+```{r, fig.width=10, fig.height=14}
+bootstrap_Rademacher <- read.csv(file="Outputs/bootstrap_wild_v4_Rademacher_gamma01_kappa02_pS09_R025.csv",
+                                 header=TRUE)
+bootstrap_Mammen2 <- read.csv(file="Outputs/bootstrap_wild_v4_Mammen2_gamma01_kappa02_pS09_R025.csv",
+                              header=TRUE)
+
+title_Rademacher <- ggdraw() +
+  draw_label("With Rademacher distribution",
+             fontface = 'bold', x = 0.25, hjust = 0, size = 12)
+title_Mammen2 <- ggdraw() +
+  draw_label("With Mammen's 2-points distribution",
+             fontface = 'bold', x = 0.25, hjust = 0, size = 12)
+
+# The vertical dashed lines indicate the values of the best WLS estimates
+#                                                 (based on original - i.e. non-bootstraped - data)
+
+# SVG: 1000 x 1400
+# PDF: 9 x 14
+plot_grid(title_Rademacher, title_Mammen2,
+          plot_density(expression(E(t[0])/N), bootstrap_Rademacher$pE, col = "#ff9700") +
+            geom_vline(xintercept = estim$pE, cex = 0.6, lty = 'dashed') +
+            scale_x_continuous(label=function(x){
+            parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}),
+          plot_density(expression(E(t[0])/N), bootstrap_Mammen2$pE, col = "#159301") +
+            geom_vline(xintercept = estim$pE, cex = 0.6, lty = 'dashed') +
+            scale_x_continuous(label=function(x){
+            parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}),
+          plot_density(expression(alpha), bootstrap_Rademacher$alpha, col = "#ff9700") +
+            geom_vline(xintercept = estim$alpha, cex = 0.6, lty = 'dashed'),
+          plot_density(expression(alpha), bootstrap_Mammen2$alpha, col = "#159301") +
+            geom_vline(xintercept = estim$alpha, cex = 0.6, lty = 'dashed'),
+          plot_density("k", bootstrap_Rademacher$k, col = "#ff9700") +
+            geom_vline(xintercept = estim$k, cex = 0.6, lty = 'dashed'),
+          plot_density("k", bootstrap_Mammen2$k, col = "#159301") +
+            geom_vline(xintercept = estim$k, cex = 0.6, lty = 'dashed'),
+          plot_density("a", bootstrap_Rademacher$a, col = "#ff9700") +
+            geom_vline(xintercept = estim$a, cex = 0.6, lty = 'dashed'),
+          plot_density("a", bootstrap_Mammen2$a, col = "#159301") +
+            geom_vline(xintercept = estim$a, cex = 0.6, lty = 'dashed'),
+          plot_density(expression(omega), bootstrap_Rademacher$omega, col = "#ff9700") +
+            geom_vline(xintercept = estim$omega, cex = 0.6, lty = 'dashed'),
+          plot_density(expression(omega), bootstrap_Mammen2$omega, col = "#159301") +
+            geom_vline(xintercept = estim$omega, cex = 0.6, lty = 'dashed'),
+          plot_density("p", bootstrap_Rademacher$p, col = "#ff9700") +
+            geom_vline(xintercept = estim$p, cex = 0.6, lty = 'dashed'),
+          plot_density("p", bootstrap_Mammen2$p, col = "#159301") +
+            geom_vline(xintercept = estim$p, cex = 0.6, lty = 'dashed'),
+          plot_density(expression(eta), bootstrap_Rademacher$eta, col = "#ff9700") +
+            scale_x_continuous(label=function(x){
+              parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}) +
+            scale_y_continuous(label=function(x){
+              parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}) +
+            geom_vline(xintercept = estim$eta, cex = 0.6, lty = 'dashed'),
+          plot_density(expression(eta), bootstrap_Mammen2$eta, col = "#159301") +
+            scale_x_continuous(label=function(x){
+              parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}) +
+            scale_y_continuous(label=function(x){
+              parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}) +
+            geom_vline(xintercept = estim$eta, cex = 0.6, lty = 'dashed'),
+          plot_density(expression(mu), bootstrap_Rademacher$mu, col = "#ff9700") +
+            geom_vline(xintercept = estim$mu, cex = 0.6, lty = 'dashed') +
+          scale_x_continuous(label=function(x){
+            parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))},
+            limits=quantile(bootstrap_Mammen2$mu, probs = c(.05/2,1-.05/2))) +
+          theme(axis.text.x = element_text(size=9, angle=10, hjust = 1)),
+          plot_density(expression(mu), bootstrap_Mammen2$mu, col = "#159301") +
+            geom_vline(xintercept = estim$mu, cex = 0.6, lty = 'dashed') +
+          scale_x_continuous(label=function(x){
+            parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))},
+            limits=quantile(bootstrap_Mammen2$mu, probs = c(.05/2,1-.05/2))) +
+          theme(axis.text.x = element_text(size=9, angle=10, hjust = 1)),
+          ncol = 2, rel_heights = c(0.2, rep(1,8)), label_x = .02, label_y = 1.15,
+          labels = c(rep("", 2), paste0(LETTERS[1:16], ")")))
+```
+
+```{r, fig.width=7, fig.height=3}
+plot_grid(plot_density("k", bootstrap_Mammen2$k, col = "#159301") +
+            geom_vline(xintercept = estim$k, cex = 0.6, lty = 'dashed'),
+          plot_density("a", bootstrap_Mammen2$a, col = "#159301") +
+            geom_vline(xintercept = estim$a, cex = 0.6, lty = 'dashed'),
+          ncol = 2, label_x = .02, label_y = 1.15, rel_heights = c(0.15,rep(1,4)),
+          labels = paste0(LETTERS[1:2], ")"))
+```
+
+```{r, fig.width=9, fig.height=8}
+# PDF: 9 x 8
+
+theme_y_blank <- theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+plot_grid(NULL, NULL,
+          plot_density("k", bootstrap_Mammen2$k, col = "#159301") +
+            geom_vline(xintercept = estim$k, cex = 0.6, lty = 'dashed') +
+            theme_y_blank,
+          plot_density("a", bootstrap_Mammen2$a, col = "#159301") +
+            geom_vline(xintercept = estim$a, cex = 0.6, lty = 'dashed') +
+            scale_x_continuous(breaks = seq(2.75,3.75,0.25),
+                               limits=quantile(bootstrap_Mammen2$a,
+                                               probs = c(.05/2,1-.05/2), na.rm = TRUE))+
+            theme_y_blank,
+          plot_density(expression(E(t[0])/N), bootstrap_Mammen2$pE, col = "#159301") +
+            geom_vline(xintercept = estim$pE, cex = 0.6, lty = 'dashed') +
+            scale_x_continuous(label=function(x){
+            parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}) +
+            theme_y_blank,
+          plot_density(expression(alpha), bootstrap_Mammen2$alpha, col = "#159301") +
+            geom_vline(xintercept = estim$alpha, cex = 0.6, lty = 'dashed') +
+            theme_y_blank,
+          plot_density(expression(omega), bootstrap_Mammen2$omega, col = "#159301") +
+            geom_vline(xintercept = estim$omega, cex = 0.6, lty = 'dashed') +
+            theme_y_blank,
+          plot_density("p", bootstrap_Mammen2$p, col = "#159301") +
+            geom_vline(xintercept = estim$p, cex = 0.6, lty = 'dashed') +
+            theme_y_blank,
+          plot_density(expression(eta), bootstrap_Mammen2$eta, col = "#159301") +
+            scale_x_continuous(label=function(x){
+              parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))}) +
+            geom_vline(xintercept = estim$eta, cex = 0.6, lty = 'dashed') +
+            theme_y_blank,
+          plot_density(expression(mu), bootstrap_Mammen2$mu, col = "#159301") +
+            geom_vline(xintercept = estim$mu, cex = 0.6, lty = 'dashed') +
+          scale_x_continuous(label=function(x){
+            parse(text=gsub("e"," %*% 10^", scales::scientific_format()(x)))},
+            limits=quantile(bootstrap_Mammen2$mu, probs = c(.05/2,1-.05/2))) +
+          theme(axis.text.x = element_text(size=9, angle=10, hjust = 1)) +
+            theme_y_blank,
+          ncol = 2, label_x = .02, label_y = 1.15, rel_heights = c(0.15,rep(1,4)),
+          labels = c(rep("", 2), paste0(LETTERS[1:8], ")")))
+```
+
+```{r, eval = FALSE}
+# SVG: 687 x 407
+# PDF: 6.87 x 4.07
+plot_grid(plot_density("k", bootstrap_Rademacher$k, col = "#ff9700") +
+               geom_vline(xintercept = estim$k, cex = 0.5, lty = 'dashed'),
+             plot_density("k", bootstrap_Mammen2$k, col = "#159301") +
+               geom_vline(xintercept = estim$k, cex = 0.5, lty = 'dashed'),
+             plot_density("a", bootstrap_Rademacher$a, col = "#ff9700") +
+               geom_vline(xintercept = estim$a, cex = 0.5, lty = 'dashed'),
+             plot_density("a", bootstrap_Mammen2$a, col = "#159301") +
+               geom_vline(xintercept = estim$a, cex = 0.5, lty = 'dashed'),
+             ncol = 2, labels = c(paste0(LETTERS[1:4], ")")))
+```
+
+```{r}
+bootstrap_Rademacher[,-c(1:4,13)] %>% drop_na %>% cor
+bootstrap_Mammen2[,-c(1:4,13)] %>% drop_na %>% cor
+```
+
+## Graphical vizualisations
+
+### Numerical simulations
+
+```{r, eval = FALSE}
+bootstrap_Rademacher$Repeat <- 1:dim(bootstrap_Rademacher)[1]
+
+bootstrap_Rademacher <- bootstrap_Rademacher %>% drop_na
+
+simul_obs_Rademacher <- lapply(1:dim(bootstrap_Rademacher)[1],
+                               FUN = function(i){
+                                 simul_obs <- simul_obs_data(estimates = bootstrap_Rademacher[i, 5:12],
+                                                             constants = c("R0" = R0, "pS" = pS,
+                                                                           "gamma" = gamma,
+                                                                           "kappa" = kappa),
+                                                             times = 0:(Tf-T0), N = N,
+                                                             stringency_index = StrInd,
+                                                             approx_init_I = TRUE,
+                                            deaths_approx_init_IS = bootstrap_Rademacher$Deaths_t1[i])
+                                 return(data.frame("Bootstrap" = bootstrap_Rademacher$Repeat[i],
+                                                   "dates" = dates[-1], simul_obs))}) %>% bind_rows
+
+# write.csv(simul_obs_Rademacher, "Outputs/simul_obs_bootstrap_wild_v4_Rademacher_gamma01_kappa02_pS09_R025.csv",
+#           row.names = FALSE)
+```
+
+```{r, eval = FALSE}
+bootstrap_Mammen2$Repeat <- 1:dim(bootstrap_Mammen2)[1]
+
+bootstrap_Mammen2 <- bootstrap_Mammen2 %>% drop_na
+
+simul_obs_Mammen2 <- lapply(1:dim(bootstrap_Mammen2)[1],
+                            FUN = function(i){
+                              simul_obs <- simul_obs_data(estimates = bootstrap_Mammen2[i, 5:12],
+                                                          constants = c("R0" = R0, "pS" = pS,
+                                                                        "gamma" = gamma,
+                                                                        "kappa" = kappa),
+                                                          times = 0:(Tf-T0), N = N,
+                                                          stringency_index = StrInd, approx_init_I = TRUE,
+                                               deaths_approx_init_IS = bootstrap_Mammen2$Deaths_t1[i])
+                              return(data.frame("Bootstrap" = bootstrap_Mammen2$Repeat[i],
+                                                "dates" = dates[-1], simul_obs))}) %>% bind_rows
+
+# write.csv(simul_obs_Mammen2, "Outputs/simul_obs_bootstrap_wild_v4_Mammen2_gamma01_kappa02_pS09_R025.csv",
+#           row.names = FALSE)
+```
+
+```{r}
+real_obs <- data.frame(NA, dates[-1], y) %>% 
+  setNames(c("Bootstrap", "dates", "T_neg", "T_pos", "Deaths"))
+estim_obs <- data.frame(0, dates[-1], compare$data_estim) %>%
+  setNames(c("Bootstrap", "dates", "T_neg", "T_pos", "Deaths"))
+
+# Bootstrap = NA: real data
+# Bootstrap = 0 : simulated data based on the best WLS estimates
+```
+
+### Plots
+
+```{r}
+theme_data <- theme_data + theme(axis.text.x = element_text(size=10, hjust = 0))
+```
+
+#### With Mammen's 2-points distribution
+
+```{r}
+simul_obs_Mammen2 <- read.csv("Outputs/simul_obs_bootstrap_wild_v4_Mammen2_gamma01_kappa02_pS09_R025.csv",
+                                 header = TRUE)
+simul_obs_Mammen2$dates <- ymd(simul_obs_Mammen2$dates)
+
+obs_Mammen2 <- rbind(real_obs, estim_obs, simul_obs_Mammen2)
+
+Fig_negative_tests_Mammen2 <- ggplot(obs_Mammen2, aes(x=dates, y=T_neg, group=Bootstrap)) +
+  geom_line(data = obs_Mammen2[-which(is.na(obs_Mammen2$Bootstrap) | obs_Mammen2$Bootstrap == 0),],
+            col="#acebec", cex=0.5) +
+  geom_line(data = obs_Mammen2[obs_Mammen2$Bootstrap == 0,], col = "#4bcbce", cex = 1.2) +
+  geom_point(data = obs_Mammen2[is.na(obs_Mammen2$Bootstrap),], col = "#009296", cex = 0.8, pch = 19) +
+  ylab("Daily new negative tests") +
+  scale_x_date(date_labels = "%b %Y") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+
+Fig_positive_tests_Mammen2 <- ggplot(obs_Mammen2, aes(x=dates, y=T_pos, group=Bootstrap)) +
+  geom_line(data = obs_Mammen2[-which(is.na(obs_Mammen2$Bootstrap) | obs_Mammen2$Bootstrap == 0),],
+            col="#fcb3ae", cex=0.5) +
+  geom_line(data = obs_Mammen2[obs_Mammen2$Bootstrap == 0,], col = "#fa355c", cex = 1.2) +
+  geom_point(data = obs_Mammen2[is.na(obs_Mammen2$Bootstrap),], col = "#ba180d", cex = 0.8, pch = 19) +
+  ylab("Daily new positive tests") +
+  scale_x_date(date_labels = "%b %Y") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+
+Fig_Deaths_Mammen2 <- ggplot(obs_Mammen2, aes(x=dates, y=Deaths, group=Bootstrap)) +
+  geom_line(data = obs_Mammen2[-which(is.na(obs_Mammen2$Bootstrap) | obs_Mammen2$Bootstrap == 0),],
+            col="gray80", cex=0.5) +
+  geom_line(data = obs_Mammen2[obs_Mammen2$Bootstrap == 0,], col = "gray40", cex = 1.2) +
+  geom_point(data = obs_Mammen2[is.na(obs_Mammen2$Bootstrap),], col = "black", cex = 0.8, pch = 19) +
+  ylab("Daily new fatality cases") +
+  scale_x_date(date_labels = "%b %Y") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+```
+
+```{r, fig.width=5, fig.height=7}
+# SVG: 500 x 700
+# PDF: 5 x 7
+
+plot_grid(NULL, NULL,
+          Fig_negative_tests_Mammen2, NULL,
+          Fig_positive_tests_Mammen2, NULL,
+          Fig_Deaths_Mammen2, NULL,
+          ncol = 2, nrow = 4,
+          labels = c("","","A)","","B)","","C)",""), label_y = 1.1,
+          rel_heights = c(0.1,rep(1,3)), rel_widths = c(1,0.05))
+```
+
+```{r, fig.width=5, fig.height=3}
+StrInd <- 0:100
+
+c_vs_StrInd <- 1:nrow(bootstrap_Mammen2) %>% lapply(FUN = function(i){
+  df <- data.frame("bootstrap" = rep(i, length(StrInd)), "StrInd" = StrInd)
+  df$c <- bootstrap_Mammen2$k[i]*(df$StrInd/100)^bootstrap_Mammen2$a[i]
+  return(df)
+  }) %>% bind_rows
+
+ggplot(c_vs_StrInd, aes(x=StrInd, y=c)) +
+  geom_line(aes(group=bootstrap), col = "#F4ACFF", lwd = 0.2) +
+  geom_line(data = data.frame("StrInd" = StrInd, "c" = estim$k*(StrInd/100)^estim$a),
+            col = "#750087", lwd = 0.7)+
+  labs(x = "\nStringency Index", y = "c(t), effectiveness of NPIs\n") +
+  scale_x_continuous(breaks = seq(0,100,10)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10))
+```
+
+#### With Rademacher distribution
+
+```{r}
+simul_obs_Rademacher <- read.csv("Outputs/simul_obs_bootstrap_wild_v4_Rademacher_gamma01_kappa02_pS09_R025.csv",
+                                 header = TRUE)
+simul_obs_Rademacher$dates <- ymd(simul_obs_Rademacher$dates)
+
+obs_Rademacher <- rbind(real_obs, estim_obs, simul_obs_Rademacher)
+
+Fig_negative_tests_Rademacher <- ggplot(obs_Rademacher, aes(x=dates, y=T_neg, group=Bootstrap)) +
+  geom_line(data = obs_Rademacher[-which(is.na(obs_Rademacher$Bootstrap) |
+                                         obs_Rademacher$Bootstrap == 0),],
+            col="#acebec", cex=0.5) +
+  geom_line(data = obs_Rademacher[obs_Rademacher$Bootstrap == 0,],
+            col = "#4bcbce", cex = 1.2) +
+  geom_point(data = obs_Rademacher[is.na(obs_Rademacher$Bootstrap),],
+             col = "#009296", cex = 1.2, pch = 19) +
+  ylab("Daily negative tests") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+
+Fig_positive_tests_Rademacher <- ggplot(obs_Rademacher, aes(x=dates, y=T_pos, group=Bootstrap)) +
+  geom_line(data = obs_Rademacher[-which(is.na(obs_Rademacher$Bootstrap) |
+                                         obs_Rademacher$Bootstrap == 0),],
+            col="#fcb3ae", cex=0.5) +
+  geom_line(data = obs_Rademacher[obs_Rademacher$Bootstrap == 0,],
+            col = "#fa355c", cex = 1.2) +
+  geom_point(data = obs_Rademacher[is.na(obs_Rademacher$Bootstrap),],
+             col = "#ba180d", cex = 1.2, pch = 19) +
+  ylab("Daily positive tests") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+
+Fig_Deaths_Rademacher <- ggplot(obs_Rademacher, aes(x=dates, y=Deaths, group=Bootstrap)) +
+  geom_line(data = obs_Rademacher[-which(is.na(obs_Rademacher$Bootstrap) |
+                                         obs_Rademacher$Bootstrap == 0),],
+            col="gray80", cex=0.5) +
+  geom_line(data = obs_Rademacher[obs_Rademacher$Bootstrap == 0,],
+            col = "gray40", cex = 1.2) +
+  geom_point(data = obs_Rademacher[is.na(obs_Rademacher$Bootstrap),],
+             col = "black", cex = 1.2, pch = 19) +
+  ylab("Daily fatality cases") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  theme_data
+```
+
+```{r, fig.width=5, fig.height=7}
+# SVG: 500 x 700
+# PDF: 5 x 7
+
+plot_grid(NULL, NULL,
+          Fig_negative_tests_Rademacher, NULL,
+          Fig_positive_tests_Rademacher, NULL,
+          Fig_Deaths_Rademacher, NULL,
+          ncol = 2, nrow = 4,
+          labels = c("","","A)","","B)","","C)",""), label_y = 1.1,
+          rel_heights = c(0.1,rep(1,3)), rel_widths = c(1,0.05))
+```
+
+```{r, fig.width=5, fig.height=3}
+StrInd <- 0:100
+
+c_vs_StrInd <- 1:nrow(bootstrap_Rademacher) %>% lapply(FUN = function(i){
+  df <- data.frame("bootstrap" = rep(i, length(StrInd)), "StrInd" = StrInd)
+  df$c <- bootstrap_Rademacher$k[i]*(df$StrInd/100)^bootstrap_Rademacher$a[i]
+  return(df)
+  }) %>% bind_rows
+
+ggplot(c_vs_StrInd, aes(x=StrInd, y=c)) +
+  geom_line(aes(group=bootstrap), col = "#F4ACFF", lwd = 0.2) +
+  geom_line(data = data.frame("StrInd" = StrInd, "c" = estim$k*(StrInd/100)^estim$a),
+            col = "#750087", lwd = 0.7)+
+  labs(x = "\nStringency Index", y = "c(t), effectiveness of NPIs\n") +
+  scale_x_continuous(breaks = seq(0,100,10)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=10), axis.text.y = element_text(size=10))
+```
+
+## With small variations in the fixed parameters
+
+```{r}
+# default: - R0      = 2.5
+#          - kappa   = 0.2
+#          - gamma   = 0.1
+#          - S(t0)/N = 0.9
+
+ref <- c("R0"=R0, "kappa"=kappa, "gamma"=gamma, "SN0"=pS)
+
+# small variations +/- 10-20 %
+
+var <- c(0.8, 0.9, 1, 1.1, 1.2)
+
+R0.var <- R0*var
+kappa.var <- kappa*var
+gamma.var <- gamma*var
+SN0.var <- pS*var[-5] # exceeds 1 when +20 %
+```
+
+```{r}
+# For instance:
+seed <- 1234
+set.seed(seed)
+
+n_starts = 500 # n optimization starting with a different set of initial values of parameters
+
+transf_parm_optim <- c(runif(n_starts, 0, 0.01) %>% log_ab(a=0,b=0.01), # initial values for E(t0)/N
+                       runif(n_starts, 0, 1) %>% logit, # initial values for alpha
+                       runif(n_starts, 0, 1) %>% logit, # initial values for k
+                       runif(n_starts, 0, 10) %>% log, # initial values for a
+                       runif(n_starts, 0.2, 0.8) %>% logit, # initial values for omega
+                       runif(n_starts, 0, 0.1) %>% log_ab(a=0,b=0.2), # initial values for p
+                       runif(n_starts, 0, 1e-4) %>% logit, # initial values for eta
+                       runif(n_starts, 0, 0.01) %>% logit) %>% # initial values for mu
+  matrix(ncol = 8, byrow = FALSE)
+
+colnames(transf_parm_optim) <- c("pE", "alpha", "k", "a", "omega", "p", "eta", "mu")
+```
+
+```{r, results = 'show', eval = FALSE}
+optim_R0 <- R0.var %>% lapply(function(r0){
+  res <- Estimate_parallel(transf_parm_optim = transf_parm_optim,
+                           constants = c("R0" = r0, "pS" = pS, "gamma" = gamma, "kappa" = kappa),
+                           approx_init_I = TRUE, deaths_approx_init_IS = D1,
+                           stringency_index = StrInd, times = 0:(Tf-T0), N = N, data_obs = y)$Results %>%
+    subset(Convergence == "Successful completion")
+  return(res[which.min(res$Value),-1] %>% c("R0" = r0))
+}) %>% bind_rows %>% as.data.frame
+
+# write.csv(optim_R0, file = paste0("Outputs/Optim_v4_vary_R0_nstarts", n_starts, ".csv"), row.names = F)
+
+optim_kappa <- kappa.var %>% lapply(function(k){
+  res <- Estimate_parallel(transf_parm_optim = transf_parm_optim,
+                           constants = c("R0" = R0, "pS" = pS, "gamma" = gamma, "kappa" = k),
+                           approx_init_I = TRUE, deaths_approx_init_IS = D1,
+                           stringency_index = StrInd, times = 0:(Tf-T0), N = N, data_obs = y)$Results %>%
+    subset(Convergence == "Successful completion")
+  return(res[which.min(res$Value),-1] %>% c("kappa" = k))
+}) %>% bind_rows %>% as.data.frame
+
+# write.csv(optim_kappa, file = paste0("Outputs/Optim_v4_vary_kappa_nstarts", n_starts, ".csv"), row.names = F)
+
+optim_gamma <- gamma.var %>% lapply(function(g){
+  res <- Estimate_parallel(transf_parm_optim = transf_parm_optim,
+                           constants = c("R0" = R0, "pS" = pS, "gamma" = g, "kappa" = kappa),
+                           approx_init_I = TRUE, deaths_approx_init_IS = D1,
+                           stringency_index = StrInd, times = 0:(Tf-T0), N = N, data_obs = y)$Results %>%
+    subset(Convergence == "Successful completion")
+  return(res[which.min(res$Value),-1] %>% c("gamma" = g))
+}) %>% bind_rows %>% as.data.frame
+
+# write.csv(optim_gamma, file = paste0("Outputs/Optim_v4_vary_gamma_nstarts", n_starts, ".csv"), row.names = F)
+
+optim_SN0 <- SN0.var %>% lapply(function(sn0){
+  res <- Estimate_parallel(transf_parm_optim = transf_parm_optim,
+                           constants = c("R0" = R0, "pS" = sn0, "gamma" = gamma, "kappa" = kappa),
+                           approx_init_I = TRUE, deaths_approx_init_IS = D1,
+                           stringency_index = StrInd, times = 0:(Tf-T0), N = N, data_obs = y)$Results %>%
+    subset(Convergence == "Successful completion")
+  return(res[which.min(res$Value),-1] %>% c("SN0" = sn0))
+}) %>% bind_rows %>% as.data.frame
+
+# write.csv(optim_SN0, file = paste0("Outputs/Optim_v4_vary_SN0_nstarts", n_starts, ".csv"), row.names = F)
+```
+
+```{r}
+optim_R0 <- read.csv("Outputs/Optim_v4_vary_R0_nstarts500.csv", header = TRUE)
+optim_kappa <- read.csv("Outputs/Optim_v4_vary_kappa_nstarts500.csv", header = TRUE)
+optim_gamma <- read.csv("Outputs/Optim_v4_vary_gamma_nstarts500.csv", header = TRUE)
+optim_SN0 <- read.csv("Outputs/Optim_v4_vary_SN0_nstarts500.csv", header = TRUE)
+
+optim_var <- rbind(optim_R0 %>% dplyr::rename(fixed_parm_value = R0) %>% cbind("fixed_parm" = "R0"),
+                   optim_kappa %>% dplyr::rename(fixed_parm_value = kappa) %>% cbind("fixed_parm" = "kappa"),
+                   optim_gamma %>% dplyr::rename(fixed_parm_value = gamma) %>% cbind("fixed_parm" = "gamma"),
+                   optim_SN0 %>% dplyr::rename(fixed_parm_value = SN0) %>% cbind("fixed_parm" = "SN0"))
+
+optim_var$var <- optim_var$fixed_parm_value %>%
+  paste0(" (", add_plus_sign(100*(.-ref[optim_var$fixed_parm])/ref[optim_var$fixed_parm], digits = 0), "%)") %>%
+  gsub(pattern = " \\( 0%\\)", replacement = "", x = .)
+
+# SNf = S(t)/N at the final time point (useful information for the second step)
+
+optim_var$SNf <- rbind(optim_R0 %>% cbind("kappa" = kappa, "gamma" = gamma, "SN0" = pS),
+                       optim_kappa  %>% cbind("R0" = R0, "gamma" = gamma, "SN0" = pS),
+                       optim_gamma %>% cbind("R0" = R0, "kappa" = kappa, "SN0" = pS),
+                       optim_SN0 %>% cbind("R0" = R0, "kappa" = kappa, "gamma" = gamma))[,-(1:2)] %>%
+  
+  apply(1, function(x){
+    
+    parm <- as.list(x)
+    parm$stringency_index <- StrInd
+    
+    init <- c("S" = x[["SN0"]], "E" = x[["pE"]])*N
+    init <- init %>%
+      c((D1/x[["alpha"]]*c(1,(1-x[["p"]])/x[["p"]]) %>% c(sum(.)*(1-x[["omega"]])/x[["omega"]]))[3:1] %>%
+          setNames(c("IA", "ISr", "ISd")))
+    
+    simul <- ode(y = c(init, "R" = N-sum(init), "D" = 0, "IS_cumul" = 0), times = 0:(Tf-T0), parms = parm,
+                 func = ODE_phase1, method = "ode45")
+    
+    return(simul[nrow(simul),2]/N) # S(t = Tf)/N
+  })
+
+optim_var2 <- optim_var %>% tidyr::gather(estim_parm, estimates, -c(Value, Convergence, fixed_parm_value, fixed_parm, var, SNf))
+optim_var2$estim_parm <- factor(optim_var2$estim_parm, levels = c("k", "a", "pE", "omega", "p", "alpha", "eta", "mu"))
+
+estimates_var <- NULL
+
+for(i in unique(optim_var2$estim_parm)){
+  for(j in unique(optim_var2$fixed_parm)){
+    
+    tab <- subset(optim_var2, estim_parm == i & fixed_parm == j)
+    estimates_var <- estimates_var %>%
+      c(tab$estimates/tab$estimates[-grep("%", tab$var)]-1)
+  }
+}
+optim_var2$estimates_var <- estimates_var
+
+# write.csv(optim_var2, file = "Outputs/Estimates_with_pertubed_parameters_phase1.csv", row.names = F)
+```
+
+```{r, fig.width = 9, fig.height = 7}
+labels_var <- c(expression(k), expression(a), expression(E(t[0])/N), expression(omega),
+                expression(p), expression(alpha), expression(eta), expression(mu))
+
+y_lim <- c(-0.5,1.3)
+y_breaks <- seq(y_lim[1], y_lim[2], by = 0.25)
+legend_pos <- c(0.8, 0.7)
+
+# Change R0 by the transmission rate beta (we vary R0 through variations in beta, not gamma)
+R0_index <- which(optim_var2$fixed_parm == "R0")
+optim_var2$fixed_parm_value[R0_index] <- gamma*optim_var2$fixed_parm_value[R0_index]
+optim_var2$fixed_parm[R0_index] <- "beta"
+optim_var2$var[R0_index] <- optim_var2$fixed_parm_value[R0_index] %>%
+  paste0(" (", add_plus_sign(100*(.-gamma*ref[["R0"]])/(gamma*ref[["R0"]]), digits = 0), "%)") %>%
+  gsub(pattern = " \\( 0%\\)", replacement = "", x = .)
+
+Fig_var.R0 <- ggplot(subset(optim_var2, fixed_parm == "beta"), aes(x=estim_parm, y=estimates_var, col=var)) +
+  geom_hline(yintercept = 0, lty = 'dashed') +
+  geom_point(size = 3, alpha = 0.75) +
+  labs(x = "Estimated parameter", y = "Relative variation\n", col = expression(beta[w]~'='~gamma[w]~R[0])) +
+  scale_x_discrete(labels = labels_var) +
+  scale_y_continuous(labels = scales::percent, limits = y_lim, breaks = y_breaks) +
+  scale_color_manual(values = colorRampPalette(c("#FF8E6A", "#AB310A"))(5)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=12), axis.title.x = element_text(size = 12),
+        axis.text.y = element_text(size=11), axis.title.y = element_text(size = 12),
+        legend.position = legend_pos, legend.box.background = element_rect(colour = "black"))
+
+Fig_var.kappa <- ggplot(subset(optim_var2, fixed_parm == "kappa"), aes(x=estim_parm, y=estimates_var, col=var)) +
+  geom_hline(yintercept = 0, lty = 'dashed') +
+  geom_point(size = 3, alpha = 0.75) +
+  labs(x = "Estimated parameter", y = "Relative variation\n", col = expression(kappa)) +
+  scale_x_discrete(labels = labels_var) +
+  scale_y_continuous(labels = scales::percent, limits = y_lim, breaks = y_breaks) +
+  scale_color_manual(values = colorRampPalette(c("#E398E4", "#780979"))(5)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=12), axis.title.x = element_text(size = 12),
+        axis.text.y = element_text(size=11), axis.title.y = element_text(size = 12),
+        legend.position = legend_pos, legend.box.background = element_rect(colour = "black"))
+
+Fig_var.gamma <- ggplot(subset(optim_var2, fixed_parm == "gamma"), aes(x=estim_parm, y=estimates_var, col=var)) +
+  geom_hline(yintercept = 0, lty = 'dashed') +
+  geom_point(size = 3, alpha = 0.75) +
+  labs(x = "Estimated parameter", y = "Relative variation\n", col = expression(gamma[w])) +
+  scale_x_discrete(labels = labels_var) +
+  scale_y_continuous(labels = scales::percent, limits = y_lim, breaks = y_breaks) +
+  scale_color_manual(values = colorRampPalette(c("#B2E691", "#146B0F"))(5)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=12), axis.title.x = element_text(size = 12),
+        axis.text.y = element_text(size=11), axis.title.y = element_text(size = 12),
+        legend.position = legend_pos + c(0, 0.05), legend.box.background = element_rect(colour = "black"))
+
+Fig_var.SN0 <- ggplot(subset(optim_var2, fixed_parm == "SN0"), aes(x=estim_parm, y=estimates_var, col=var)) +
+  geom_hline(yintercept = 0, lty = 'dashed') +
+  geom_point(size = 3, alpha = 0.75) +
+  labs(x = "Estimated parameter", y = "Relative variation\n", col = expression(S(t[0]^step1)/N)) +
+  scale_x_discrete(labels = labels_var) +
+  scale_y_continuous(labels = scales::percent, limits = y_lim, breaks = y_breaks) +
+  scale_color_manual(values = colorRampPalette(c("#AED4E7", "#0A6295"))(4)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size=12), axis.title.x = element_text(size = 12),
+        axis.text.y = element_text(size=11), axis.title.y = element_text(size = 12),
+        legend.position = legend_pos + c(0, 0.08), legend.box.background = element_rect(colour = "black"))
+
+plot_grid(Fig_var.R0 + theme(axis.title.x = element_blank()),
+          Fig_var.kappa + theme(axis.title.x = element_blank()),
+          Fig_var.gamma,
+          Fig_var.SN0,
+          ncol = 2, align = 'v', labels = paste0("1.", LETTERS[1:4], ")"), label_x = -0.025)
+
+# saveRDS(list("R0" = Fig_var.R0, "kappa" = Fig_var.kappa, "gamma" = Fig_var.gamma, "SN0" = Fig_var.SN0), "Outputs/Fig_optim_var_step1.rds")
+```
