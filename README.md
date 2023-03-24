@@ -37,15 +37,15 @@ All the scripts are in the root directory of this repositery. We developed a two
 (1) In the first step, we infer how the Stringency Index reduces the amount of viral transmission - assuming that it wouldn't affect the duration of infectiousness - just before the emergence of the Alpha Variant;
 
 Scripts:
-- **STEP1_functions.R** (script with functions used in the first step)
+- **STEP1_functions.R** (script with the custom functions used in the first step)
 - **STEP1_Script_UK_data.Rmd** (analyses using the UK data)
 - **STEP1_Identifiability_profiles.Rmd** (build and plot identifiability profiles of the model)
 
 (2) In the second step, based on a novel theoretical derivation of the selection gradient in an SEIR model, we infer the phenotype of the Alpha variant in terms of transmission and recovery from the analysis of the change in its logit-frequency.
 
 Scripts:
-- **STEP2_functions.R** (script with functions used in the second step)
-- **STEP2_Script_England_data.Rmd** (analyses - including the mixed-effects model - using the data from England)
+- **STEP2_functions.R** (script with the custom functions used in the second step)
+- **STEP2_Script_England_data.Rmd** (analyses - including the mixed-effects models - using the data from England)
 
 ---
 
