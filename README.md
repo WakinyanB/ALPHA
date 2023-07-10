@@ -1,9 +1,12 @@
 # ALPHA
 
-**(Data & Codes for MS:) Phenotypic evolution of SARS-CoV-2: a statistical inference approach**
+(Data & Codes for MS:)<br>
+**Phenotypic evolution of SARS-CoV-2: a statistical inference approach**
 
-Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon<br>
-*CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France*
+Wakinyan Benhamou, Sébastien Lion, Rémi Choquet<sup>&#x2020;</sup> and Sylvain Gandon<sup>&#x2020;</sup><br>
+*CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France*<br>
+
+&#x2020;: equal contribution
 
 ## Data (sources and short descriptions)
 
