@@ -3,10 +3,8 @@
 (Data & Codes for:)<br>
 **Phenotypic evolution of SARS-CoV-2: a statistical inference approach**
 
-Wakinyan Benhamou, Sébastien Lion, Rémi Choquet<sup>&#x2020;</sup> and Sylvain Gandon<sup>&#x2020;</sup><br>
+Wakinyan Benhamou, Sébastien Lion, Rémi Choquet and Sylvain Gandon
 *CEFE, CNRS, Univ Montpellier, EPHE, IRD, Montpellier, France*<br>
-
-&#x2020;: equal contribution
 
 Evolution, Volume 77, Issue 10, October 2023, Pages 2213–2223, [https://doi.org/10.1093/evolut/qpad133](https://doi.org/10.1093/evolut/qpad133)
 
