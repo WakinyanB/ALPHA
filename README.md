@@ -8,6 +8,8 @@ Wakinyan Benhamou, Sébastien Lion, Rémi Choquet<sup>&#x2020;</sup> and Sylvain
 
 &#x2020;: equal contribution
 
+Evolution, Volume 77, Issue 10, October 2023, Pages 2213–2223, [https://doi.org/10.1093/evolut/qpad133](https://doi.org/10.1093/evolut/qpad133)
+
 ## Data (sources and short descriptions)
 
 This is previously publicly available data that were downloaded from the Internet. All data used in the scripts are in the 'Data' folder (and may also be found from the sources mentioned below). 
